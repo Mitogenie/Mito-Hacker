@@ -1,7 +1,8 @@
 # CeMiA
+
 [![N|Solid](https://raw.githubusercontent.com/Mitogenie/CeMiA/master/misc/KLab.png)](https://mic.med.virginia.edu/kashatus/)
 
-### Cellular Mitochondrial Analyzer 
+### Cellular Mitochondrial Analyzer
 
 ![Build Status](https://raw.githubusercontent.com/Mitogenie/CeMiA/master/misc/ver.png)
 ##### CeMiA is a set of tools to enable high-throughput analysis of mitochondrial network morphology.
@@ -10,7 +11,7 @@
   - ##### Mito Miner
   - ##### MiA
   - ##### Nuc Adder
-  
+
 
 ###### User Interface
 All the tools in CeMiA toolkit offer interactive, semi graphical user interface through Jupyter notebooks.
@@ -25,7 +26,7 @@ All the tools analyze one cell at a time. However, Cell Catcher and Mito Miner, 
 $ pip install opencv-python==3.4.2.17
 ```
   - All the tools (Jupyter notebook files) in CeMiA package, depend on cemia55s.py to run. This module includes all the functions used in the develepment of these tools. This file should be in the same folder as the jupyter notebook you are running.
-  
+
 ### CeMiA Toolkit
 
 #### Cell Catcher
@@ -34,10 +35,10 @@ Cell Catcher is a tool designed to automatically detect, separate, and isolate i
 ###### What to know before use
 - Input: Standard RGB Tiff images
     - Multi-cell fluorescence images
-        - Number of stains: 2 
+        - Number of stains: 2
             - Nuclei should be stained with DAPI
 - Output: Single-cell fluorescence images (Standard RGB Tiff)
-    - Output images can used as input for Mito Miner to extract their mitochondrial network, or they can be independently used to train the desired ML or NN models where appropriate. 
+    - Output images can used as input for Mito Miner to extract their mitochondrial network, or they can be independently used to train the desired ML or NN models where appropriate.
 
 ###### Instructions
 - Run Cell_Catcher.ipynb using Jupyter notebook.
@@ -49,14 +50,14 @@ Cell Catcher is a tool designed to automatically detect, separate, and isolate i
 - 500+ images were used to develop and test Cell Catcher.
 
 #### Mito Miner
-Mito Miner is a tool to segment mitochondrial netwrok in the cells. It uses the statistical distribution of pixel intensities across the mitochondrial network to detect and remove background noise from the cell and segment the mitochondrial network. Additionally, this tool can further improve the accuracy of the mitochondrial network segmentation through an optional adaptive correction, which takes the variation in the efficiency of fluorescence staining across each cell into account to enhance mitochondrial segmentation. 
+Mito Miner is a tool to segment mitochondrial netwrok in the cells. It uses the statistical distribution of pixel intensities across the mitochondrial network to detect and remove background noise from the cell and segment the mitochondrial network. Additionally, this tool can further improve the accuracy of the mitochondrial network segmentation through an optional adaptive correction, which takes the variation in the efficiency of fluorescence staining across each cell into account to enhance mitochondrial segmentation.
 ###### What to know before use
 - Input: Standard RGB Tiff images
     - Single-cell fluorescence images
-        - Number of stains: 2 
+        - Number of stains: 2
             - Nuclei should be stained with DAPI
 - Output: Single-cell binary images of mitochondrial network
-    - Output images can used as input for MiA to quantify their mitochondrial network, or they can be independently used to train the desired ML or NN models where appropriate. 
+    - Output images can used as input for MiA to quantify their mitochondrial network, or they can be independently used to train the desired ML or NN models where appropriate.
 ###### Instructions:
 - Run Mito_Miner.ipynb using Jupyter notebook.
     - You may find this video on Jupyter notebooks very helpful: [Watch Here](https://youtu.be/HW29067qVWk)
@@ -66,10 +67,10 @@ Mito Miner is a tool to segment mitochondrial netwrok in the cells. It uses the 
 - 7500+ images were used to develop and test Mito Miner.
 
 #### MiA (Mitochondrial Analyzer)
-MiA uses the binarized mitochondrial network to perform greater than 100 mitochondria-level and cell-level morphometric measurements. 
+MiA uses the binarized mitochondrial network to perform greater than 100 mitochondria-level and cell-level morphometric measurements.
 ###### What to know before use
 - Input: Single-cell binary images of mitochondrial network
-- Output: Tabular data (TSV format), including aggregate(per cell, and per mitochondrion where applicable) and raw (per mitochondrion) measurements. 
+- Output: Tabular data (TSV format), including aggregate(per cell, and per mitochondrion where applicable) and raw (per mitochondrion) measurements.
     - Why raw data along with aggregate measurements?
         - Flexibility! By providing raw data, users can limit or aggregate their data using their own criteria on each mitochondrial, or sub mitochondrial measurements, which can provide additional insight based on their specific applications.
 ###### Instructions:
@@ -86,10 +87,10 @@ Cell Catcher, and Mito Miner require RGB images of the cells, where nuclei are s
 ###### What to know before use
 - Input: Standard RGB Tiff images
     - Single- or Multi-cell fluorescence images
-        - Number of stains: 1 
+        - Number of stains: 1
             - The stanied channel should be red or green.
 - Output: Multi- or Single-cell fluorescence images (Standard RGB Tiff)
-    - Output images with synthetic nuclei can used as input for Mito Miner or Cell Catcher. 
+    - Output images with synthetic nuclei can used as input for Mito Miner or Cell Catcher.
 
 ###### Instructions
 - Run Nuc_Adder.ipynb using Jupyter notebook.
@@ -109,14 +110,14 @@ Cell Catcher, and Mito Miner require RGB images of the cells, where nuclei are s
 ###### Mitochondrial aggregate measurements
 - These are cell-level measurements that are aggregates of raw mitochondrial-level measurements.
     - cell_mean_mito_<feature>: Average of the feature among all the mitochondria in the cell.
-        - Example: 
+        - Example:
             - cell_mean_mito_area: Average of the area among all the mitochondria in the cell.
-            
+
     - cell_median_mito_<feature>: Median of the feature among all the mitochondria in the cell.
-        - Example: 
+        - Example:
             - cell_median_mito_area: Median of the area among all the mitochondria in the cell.
-    - cell_std_mito_<feature>: Standard Deviation of the feature among all the mitochondria in the cell. 
-        - Example: 
+    - cell_std_mito_<feature>: Standard Deviation of the feature among all the mitochondria in the cell.
+        - Example:
             - cell_std_mito_area: Standard deviation of the area among all the mitochondria in the cell.
 
 ###### Cell level measurements based on mitochondria distribution
@@ -146,14 +147,14 @@ your_project_folder/ (Name of you project folder)
 ├── cell_catcher_params.csv
 ├── mito_miner_params.csv
 ├── Mia_output_file.csv (Named by user)
-└── cell_catcher_temp/ (Can optionally be deleted after using Cell Catcher) 
+└── cell_catcher_temp/ (Can optionally be deleted after using Cell Catcher)
 ```
 
 ##### Different Apps Input/Output Folders:
-- Cell Catcher: 
+- Cell Catcher:
   - Input: your_project_folder/
   - Output: your_project_folder/output/to_analyze
-- Mito Miner: 
+- Mito Miner:
   - Input: your_project_folder/output/to_analyze
   - Output: your_project_folder/output/processed/single_cells_binary/
 - MiA
