@@ -27,6 +27,9 @@ $ pip install opencv-python==3.4.2.17
 ```
   - All the tools (Jupyter notebook files) in CeMiA package, depend on cemia55s.py to run. This module includes all the functions used in the develepment of these tools. This file should be in the same folder as the jupyter notebook you are running.
 
+### Where to start?
+You can start by downloading or cloning this repository on your computer.
+
 ### CeMiA Toolkit
 
 #### Cell Catcher
