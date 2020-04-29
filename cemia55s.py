@@ -1002,7 +1002,7 @@ def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_
 
             for i in multi_link_indices:
 
-                nucs = sure_link_matrix.loc[i,:].nonzero()[0]+1
+                nucs = sure_link_matrix.loc[i,:].to_numpy().nonzero()[0]+1
 
                 for nuc in nucs:
                     prob_pixels = list(map(lambda x: 10*(nuc_rv_list[nuc-1].pdf(x)),list_dict_mito[i]))
@@ -1160,6 +1160,7 @@ def single_cell_QC(abspath, full_path_to_image ,hide=True):
 
         # Identifying aliens
         _,t2t_sc = cv2.threshold(mito_channel_sc, 0.01*np.max(mito_channel_sc), 255, cv2.THRESH_BINARY)
+        _,nuc_mask_sc = cv2.threshold(image_sc[:,:,2], 0.01*np.max(image_sc[:,:,2]), 255, cv2.THRESH_BINARY)
 
         mitoLabels_sc = measure.label(t2t_sc, connectivity=2)
         propMito_sc = regionprops(mitoLabels_sc)
@@ -1167,17 +1168,34 @@ def single_cell_QC(abspath, full_path_to_image ,hide=True):
 
         #Size based filtering
         area_list = []
+        mask_counter = 0
         for r in range(len(propMito_sc)):
             area_list.append(propMito_sc[r].area)
 
         for r in range(len(propMito_sc)):
-            if (propMito_sc[r].area > 0.005 * np.max(area_list)) and (propMito_sc[r].area < np.max(area_list)):
+            if (propMito_sc[r].area > 0.001 * np.max(area_list)):
                 if propMito_sc[r].label == 0:
                     continue
                 else:
                     globalMask_sc = np.zeros(t2t_sc.shape, dtype="uint8")
                     globalMask_sc[mitoLabels_sc == propMito_sc[r].label] = 255
-                    good_mask_sc = cv2.add(good_mask_sc,globalMask_sc)
+
+                    is_main = cv2.bitwise_and(nuc_mask_sc, globalMask_sc)
+                    if np.sum(is_main) == 0:
+                        good_mask_sc = cv2.add(good_mask_sc,globalMask_sc)
+                    else:
+                        mask_counter += 1
+
+        #if no mito-blob touches the nucleus
+        if mask_counter == 0:
+            for r in range(len(propMito_sc)):
+                if (propMito_sc[r].area > 0.001 * np.max(area_list)) and (propMito_sc[r].area < np.max(area_list)):
+                    if propMito_sc[r].label == 0:
+                        continue
+                    else:
+                        globalMask_sc = np.zeros(t2t_sc.shape, dtype="uint8")
+                        globalMask_sc[mitoLabels_sc == propMito_sc[r].label] = 255
+                        good_mask_sc = cv2.add(good_mask_sc,globalMask_sc)
 
         good_mask_sc = cv2.medianBlur(good_mask_sc, 3)
         good_mask_sc = 255 - good_mask_sc
