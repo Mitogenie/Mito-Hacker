@@ -1,5 +1,5 @@
 #CeMiA Core v 0.5.5s
-#Update 041820
+#Update 042920
 #Kashatus Lab@UVA
 
 import numpy as np
@@ -23,6 +23,8 @@ import pandas as pd
 from scipy.stats import multivariate_normal
 from scipy import ndimage
 from scipy import stats
+import shutil
+
 
 if __name__ == '__main__':
     print('This is a helper file for CeMiA, and it is not supposed to run directly.')
@@ -723,6 +725,9 @@ def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_
 
         lbl = cv2.add(lbl,lbl2_tmp)
 
+        mask_blue = deepcopy(lbl)
+        mask_blue[mask_blue>0] = 255
+
 
     # Create the labeled image
     fig = plt.figure(figsize=(10,10))
@@ -1023,24 +1028,25 @@ def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_
                 x = np.array(list(map(lambda x: x[0],list_dict_nuc[key])))
                 y = np.array(list(map(lambda x: x[1],list_dict_nuc[key])))
 
+                quality_tags[key] = 'Good'
 
-                if ((len(x[x<4]) + len(y[y<4]) + len(x[x>1020]) + len(y[y>1020])) > 8):
+            #     if ((len(x[x<4]) + len(y[y<4]) + len(x[x>1020]) + len(y[y>1020])) > 8):
 
-                    quality_tags[key] = 'Bad'
+            #         quality_tags[key] = 'Bad'
 
-                else:
+            #     else:
 
-                    quality_tags[key] = 'Good'
+            #         quality_tags[key] = 'Good'
 
-            for key in list_dict_nuc_temp.keys():
+            # for key in list_dict_nuc_temp.keys():
 
-                x = np.array(list(map(lambda x: x[0],list_dict_nuc_temp[key])))
-                y = np.array(list(map(lambda x: x[1],list_dict_nuc_temp[key])))
+            #     x = np.array(list(map(lambda x: x[0],list_dict_nuc_temp[key])))
+            #     y = np.array(list(map(lambda x: x[1],list_dict_nuc_temp[key])))
 
 
-                if ((len(x[x<4]) + len(y[y<4]) + len(x[x>1020]) + len(y[y>1020])) > 2000):
-                    print((len(x[x<4]) + len(y[y<4]) + len(x[x>1020]) + len(y[y>1020])))
-                    quality_tags[key] = 'Bad'
+            #     if ((len(x[x<4]) + len(y[y<4]) + len(x[x>1020]) + len(y[y>1020])) > 2000):
+            #         print((len(x[x<4]) + len(y[y<4]) + len(x[x>1020]) + len(y[y>1020])))
+            #         quality_tags[key] = 'Bad'
 
 
 
@@ -1049,6 +1055,7 @@ def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_
             cellBinaryMask = np.zeros(mito_bw.shape, dtype="uint8")
             singleCellMask = np.zeros(image.shape, dtype="uint8")
             image_rev = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            image_rev[:,:,2] = cv2.bitwise_and(mask_blue,image_rev[:,:,2])
 
             for i in range(len(list_dict_nuc_temp2)):
                 for pixel in list_dict_nuc_temp2[i+1]:
@@ -1089,8 +1096,7 @@ def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_
                 M = np.float32([[1,0,shift_x],[0,1,shift_y]])
                 singleCellMask = cv2.warpAffine(singleCellMask,M,(cols,rows))
 
-
-                print(f'Cell {i+1} QC: {quality_tags[i+1]}')
+                # print(f'Cell {i+1} QC: {quality_tags[i+1]}')
 
                 if quality_tags[i+1] == 'Good':
 
@@ -1101,8 +1107,9 @@ def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_
                         print()
                     except:
                         pass
-                    print(File_Path + '/to_analyze/' + namestring.strip('.tif') + '_cell{}_{}.tif'.format(i+1,singleCellMask.shape[0]))
-                    cv2.imwrite(File_Path + '/to_analyze/' + namestring.strip('.tif') + '_cell{}_{}.tif'.format(i+1,singleCellMask.shape[0]) , cv2.cvtColor(singleCellMask, cv2.COLOR_RGB2BGR))
+                    full_path_to_image = File_Path + '/to_analyze/' + namestring.strip('.tif') + '_cell{}_{}.tif'.format(i+1,singleCellMask.shape[0])
+                    cv2.imwrite(full_path_to_image , cv2.cvtColor(singleCellMask, cv2.COLOR_RGB2BGR))
+                    single_cell_QC(abspath, full_path_to_image ,hide)
 
                 elif quality_tags[i+1] == 'Bad':
 
@@ -1116,13 +1123,179 @@ def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_
                     cv2.imwrite(File_Path + '/to_discard/' + namestring.strip('.tif') + '_cell{}_{}.tif'.format(i+1,singleCellMask.shape[0]) , cv2.cvtColor(singleCellMask, cv2.COLOR_RGB2BGR))
 
                 if hide == False:
-                    plt.figure(figsize=(10,10))
-                    plt.imshow(singleCellMask)
-                    plt.title(f'Cell {i+1}')
+                    # plt.figure(figsize=(10,10))
+                    # plt.imshow(singleCellMask)
+                    # plt.title(f'Cell {i+1}')
+                    pass
 
                 cellBinaryMask = np.zeros(mito_bw.shape, dtype="uint8")
 
+
+
     return mask_blue
+
+# Garbage Collector and QC control for Cell Catcher export.
+# Garbage Collector and QC control for Cell Catcher export.
+def single_cell_QC(abspath, full_path_to_image ,hide=True):
+
+    # Creating Junkyard
+    try:
+        os.makedirs(os.path.join(abspath,'to_discard'))
+    except:
+        pass
+
+    try:
+        # Read image
+        image_sc_in = cv2.imread(full_path_to_image)
+        image_sc = cv2.cvtColor(image_sc_in, cv2.COLOR_BGR2RGB)
+        # Detecting Mitochondria Channel
+        red = image_sc[:,:,0]
+        rd_sm = np.sum(red)
+
+        mito_channel_sc = image_sc[:,:,1]
+        gr_sm = np.sum(mito_channel_sc)
+
+        if rd_sm > gr_sm:
+            mito_channel_sc = red.copy()
+
+        # Identifying aliens
+        _,t2t_sc = cv2.threshold(mito_channel_sc, 0.01*np.max(mito_channel_sc), 255, cv2.THRESH_BINARY)
+
+        mitoLabels_sc = measure.label(t2t_sc, connectivity=2)
+        propMito_sc = regionprops(mitoLabels_sc)
+        good_mask_sc = np.zeros(t2t_sc.shape, dtype="uint8")
+
+        #Size based filtering
+        area_list = []
+        for r in range(len(propMito_sc)):
+            area_list.append(propMito_sc[r].area)
+
+        for r in range(len(propMito_sc)):
+            if (propMito_sc[r].area > 0.005 * np.max(area_list)) and (propMito_sc[r].area < np.max(area_list)):
+                if propMito_sc[r].label == 0:
+                    continue
+                else:
+                    globalMask_sc = np.zeros(t2t_sc.shape, dtype="uint8")
+                    globalMask_sc[mitoLabels_sc == propMito_sc[r].label] = 255
+                    good_mask_sc = cv2.add(good_mask_sc,globalMask_sc)
+
+        good_mask_sc = cv2.medianBlur(good_mask_sc, 3)
+        good_mask_sc = 255 - good_mask_sc
+
+        image_sc[:,:,1] = cv2.bitwise_and(image_sc[:,:,1],good_mask_sc)
+        image_sc[:,:,2] = cv2.bitwise_and(image_sc[:,:,2],good_mask_sc)
+
+        #Identifying and discarding cells that are touching image edges or missing mitochondria
+
+        qc_mask = np.zeros(t2t_sc.shape, dtype="uint8")
+        qc_mask[4:1020,4:1020] = 255
+        qc_mask = 255 - qc_mask
+
+        edge_sum = np.sum(cv2.bitwise_and(image_sc[:,:,0],qc_mask)) + np.sum(cv2.bitwise_and(image_sc[:,:,1],qc_mask)) + np.sum(cv2.bitwise_and(image_sc[:,:,2],qc_mask))
+        mito_sum = np.sum(image_sc[:,:,0]) + np.sum(image_sc[:,:,1])
+        print(full_path_to_image, mito_sum, abspath)
+
+        if (mito_sum < 50000) or (edge_sum) > 8:
+            shutil.move(full_path_to_image, os.path.join(abspath,'to_discard', os.path.split(full_path_to_image)[1]))
+            print(f'Did not pass QC: {full_path_to_image}')
+            print(f'{full_path_to_image} discarded. (check "to_discard" direcoty)')
+
+        else:
+            print(f'QC Passed: {full_path_to_image}')
+
+            if hide == False:
+                plt.figure(figsize=(10,10))
+                plt.imshow(image_sc)
+                plt.title(f'{full_path_to_image}')
+
+            os.remove(full_path_to_image)
+            cv2.imwrite(full_path_to_image , cv2.cvtColor(image_sc, cv2.COLOR_BGR2RGB))
+    except:
+        print(f'Could not improve {full_path_to_image}')
+        pass
+
+
+
+# # Garbage Collector and QC control for Cell Catcher export.
+# def single_cell_QC(abspath, hide=True):
+
+#     # Creating Junkyard
+#     try:
+#         os.makedirs(os.path.join(abspath,'to_discard'))
+#     except:
+#         pass
+
+#     files_to_check = os.listdir(os.path.join(abspath, 'to_analyze'))
+
+#     for fullpath_input in files_to_check:
+#         print(os.path.join(abspath, 'to_analyze',fullpath_input))
+#         try:
+
+#             # Read image
+#             image = cv2.imread(os.path.join(abspath, 'to_analyze',fullpath_input))
+
+#             # Detecting Mitochondria Channel
+#             red = image[:,:,1]
+#             rd_sm = np.sum(red)
+
+#             mito_channel = image[:,:,2]
+#             gr_sm = np.sum(mito_channel)
+
+#             if rd_sm > gr_sm:
+#                 mito_channel = red.copy()
+
+#             # Identifying aliens
+#             _,t2t = cv2.threshold(mito_channel, 0.01*np.max(mito_channel), 255, cv2.THRESH_BINARY)
+
+#             mitoLabels = measure.label(t2t, connectivity=2)
+#             propMito = regionprops(mitoLabels)
+#             good_mask = np.zeros(t2t.shape, dtype="uint8")
+
+#             #Size based filtering
+#             area_list = []
+#             for r in range(len(propMito)):
+#                 area_list.append(propMito[r].area)
+
+#             for r in range(len(propMito)):
+#                 if (propMito[r].area > 0.005 * np.max(area_list)) and (propMito[r].area < np.max(area_list)):
+#                     if propMito[r].label == 0:
+#                         continue
+#                     else:
+#                         globalMask = np.zeros(t2t.shape, dtype="uint8")
+#                         globalMask[mitoLabels == propMito[r].label] = 255
+#                         good_mask = cv2.add(good_mask,globalMask)
+
+#             good_mask = cv2.medianBlur(good_mask, 3)
+#             good_mask = 255 - good_mask
+
+#             image[:,:,1] = cv2.bitwise_and(image[:,:,1],good_mask)
+#             image[:,:,2] = cv2.bitwise_and(image[:,:,2],good_mask)
+
+#             #Identifying and discarding cells that are touching image edges or missing mitochondria
+
+#             qc_mask = np.zeros(t2t.shape, dtype="uint8")
+#             qc_mask[4:1020,4:1020] = 255
+#             qc_mask = 255 - qc_mask
+
+#             edge_sum = np.sum(cv2.bitwise_and(image[:,:,1],qc_mask)) + np.sum(cv2.bitwise_and(image[:,:,2],qc_mask))
+#             mito_sum = np.sum(image[:,:,1]) + np.sum(image[:,:,2])
+
+#             if (mito_sum < 10000) or (edge_sum) > 8:
+#                 shutil.move(fullpath_input, os.path.join(abspath,'to_discard', os.path.split(fullpath_input)[1]))
+#                 print(f'Did not pass QC: {fullpath_input}')
+#                 print(f'{fullpath_input} discarded. (check "to_discard" direcoty)')
+
+#             else:
+#                 print(f'QC Passed: {fullpath_input}')
+#                 cv2.imwrite(os.path.join(abspath,'to_analyze', os.path.split(fullpath_input)[1]) , image ) #cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+#                 if hide == False:
+#                     plt.figure(figsize=(10,10))
+#                     plt.imshow(cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
+#                     plt.title(f'{fullpath_input}')
+#         except:
+#             # print(f'{fullpath_input} is not a valid image.')
+#             pass
+
 
 
 
