@@ -19,12 +19,13 @@ All the tools in CeMiA toolkit offer interactive, semi graphical user interface 
 All the tools analyze one cell at a time. However, Cell Catcher and Mito Miner, benefit from Multi-Threading, where applicable, to enhance the performance.
 ###### Requirements
   - CeMiA toolkit is developed in Jupyter notebooks using Python 3. Since it benefits from a wide range of Python libraries, along with Jupyter notebooks, we suggest installing Anaconda distribution of Python (V 3.7). --> [Download Anaconda](https://www.anaconda.com/distribution/)
-  - While Anaconda installation takes care of most of the library requirements for CeMiA, there is only one more library (OpenCV) that needs to be installed, which can be done through the command line. (You just need to copy and run the following command. (without the $))
+  - While Anaconda installation takes care of most of the library requirements for CeMiA, there is only one more libary (OpenCV) that needs to be installed, which can be achieved through the command line. (You just need to copy and run the following command. (without the $))
     - Windows: Use Anaconda Prompt.
     - MacOS, Linux: Use Terminal.
 ```sh
 $ pip install opencv-python==3.4.2.17
 ```
+  - It is important to install this specific version of OpenCV for compatibility.
   - All the tools (Jupyter notebook files) in CeMiA package, depend on cemia55s.py to run. This module includes all the functions used in the develepment of these tools. This file should be in the same folder as the jupyter notebook you are running.
 
 ### Where to start your analysis?
