@@ -18,7 +18,9 @@ All the tools in CeMiA toolkit offer interactive, semi graphical user interface 
 ###### Processing
 All the tools analyze one cell at a time. However, Cell Catcher and Mito Miner, benefit from Multi-Threading, where applicable, to enhance the performance.
 ###### Requirements
+Follow these instructions if you do not have Anaconda or Jupyter notebooks installed on your computer
   - CeMiA toolkit is developed in Jupyter notebooks using Python 3. Since it benefits from a wide range of Python libraries, along with Jupyter notebooks, we suggest installing Anaconda distribution of Python (V 3.7). --> [Download Anaconda](https://www.anaconda.com/distribution/)
+You may follow the rest of the instructions if you do not already have OpenCV installed on your computer.
   - While Anaconda installation takes care of most of the library requirements for CeMiA, there is only one more libary (OpenCV) that needs to be installed, which can be achieved through the command line. (You just need to copy and run the following command. (without the $))
     - Windows: Use Anaconda Prompt.
     - MacOS, Linux: Use Terminal.
@@ -29,7 +31,9 @@ $ pip install opencv-python==3.4.2.17
   - All the tools (Jupyter notebook files) in CeMiA package, depend on cemia55s.py to run. This module includes all the functions used in the develepment of these tools. This file should be in the same folder as the jupyter notebook you are running.
 
 ### Where to start your analysis?
-Once you have satistfied the requirements, you can start your analysis by downloading or cloning this repository on your computer.
+Once you have satistfied the requirements, you can start your analysis by downloading or cloning this repository on your computer. The simplest way is to download the whole directory by pressing the green button (top right) and download the ZIP file.
+The following Flow chart helps you to choose the best tool based on the data you have.
+![Flow Chart](https://raw.githubusercontent.com/Mitogenie/CeMiA/master/misc/Flowchart.png)
 
 ### CeMiA Toolkit
 
