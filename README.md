@@ -181,6 +181,7 @@ your_project_folder/ (Name of you project folder)
 - copy
 - cv2
 - datetime
+- ipywidgets
 - math
 - matplotlib.pyplot
 - numpy
