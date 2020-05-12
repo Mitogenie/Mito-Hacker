@@ -443,7 +443,7 @@ def behind_the_moon_filter(img, thresh,thresh2, thresh3,bg_harshness=-0.5,sig_ha
             _, masked = cv2.threshold(pre_processed[i], new_sig, 255, cv2.THRESH_BINARY)
 
             if remove_debries:
-                kernel_final = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3,3))
+                kernel_final = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5,5)) # previously (3,3)
                 masked = cv2.morphologyEx(masked, cv2.MORPH_OPEN, kernel_final)
 
             post_processed.append(masked)
