@@ -1,5 +1,5 @@
 #CeMiA Core v 0.5.5s
-#Update 042920
+#Update 050720
 #Kashatus Lab@UVA
 
 import numpy as np
@@ -43,6 +43,7 @@ def address():
 
         try:
             file_list = os.listdir(address)
+            print('\nAll set! You may run the next cell.')
             return address, file_list
             break
         except:
@@ -52,7 +53,7 @@ def address():
 
 # Set the max number of files to be samples from the target directory
 def how_many(file_list):
-    print('\nHow many files to sample? (If possile)')
+    print('\nHow many files to sample? (If possible)')
 
     while True:
         how_many = input('Please enter a valid integer value below {}\n'.format(len(file_list)))
@@ -245,12 +246,12 @@ def nucleus_filtering(fullpath_input, abspath, intensity_thresh,size_thresh,show
         plt.figure(figsize=(20,10))
         plt.subplot(121)
         plt.axis('off')
-        plt.title('Processed and cleaned nuclei')
+        plt.title('Processed and cleaned nuclei',fontsize=16)
         plt.imshow(mask,'gray')
 
         plt.subplot(122)
         plt.axis('off')
-        plt.title('Original image')
+        plt.title('Original image',fontsize=16)
         plt.imshow(cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
         plt.show()
 
@@ -604,7 +605,7 @@ def mysig(height,harshness,compactness,value,shift,offset):
 
 
 # Cell Segmentation from multi-cell images
-def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_size,correct, nuc_intensity_threshold, nuc_size_threshold,empty_cell_thresh, hide, nuc_correct,diffused):
+def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_size,correct, nuc_intensity_threshold, nuc_size_threshold,empty_cell_thresh, hide, nuc_correct,diffused, mito_diffused, entangled):
 
     # Read and reshape image
     image = cv2.imread(fullpath_input)
@@ -615,6 +616,7 @@ def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_
     image_cp1 = deepcopy(image)
     image_cp2 = deepcopy(image)
     image_cp3 = deepcopy(image)
+    image_cp4 = deepcopy(image)
 
     # Keeping Nuclei
     image_cp3[:,:,1] = 0
@@ -638,7 +640,7 @@ def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_
     good_mask = np.zeros(t2t.shape, dtype="uint8")
 
     for r in range(len(propMito)):
-        if propMito[r].area > 5000:
+        if propMito[r].area > 2500:
             if propMito[r].label == 0:
                 continue
             else:
@@ -770,23 +772,38 @@ def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_
 
         # Make grayscale image of mito
         mito_gray = cv2.cvtColor(image_cp1, cv2.COLOR_BGR2GRAY)
-        blur_mito = cv2.GaussianBlur(mito_gray, (25, 25),25)
+        # blur_mito = cv2.GaussianBlur(mito_gray, (25, 25),25)
 
         # Binarize and denoise mito
-        _,mito_bw = cv2.threshold(mito_gray, np.percentile(mito_gray[mito_gray>0], filt), 255, cv2.THRESH_BINARY )
+        _,mito_bw = cv2.threshold(mito_gray, np.percentile(mito_gray[mito_gray>0], filt), 255, cv2.THRESH_BINARY)
         mito_bw = cv2.medianBlur(mito_bw, 5)
         mito_bw = cv2.medianBlur(mito_bw, 3)
 
+        if mito_diffused:
+
+            ch,mt = improve_mito(image_cp4)
+            _,mito_bw = cv2.threshold(mt, np.percentile(mt[mt>0], filt), 255, cv2.THRESH_BINARY)
+            mito_bw = cv2.medianBlur(mito_bw, 3)
+            mito_bw = cv2.medianBlur(mito_bw, 5)
+
+
+
+
         plt.figure(figsize=(20,10))
-        plt.subplot(121)
-        plt.imshow(cv2.cvtColor(image_cp1,cv2.COLOR_RGB2BGR))
-        plt.title('Mito Channel')
+        if mito_diffused:
+            plt.subplot(121)
+            plt.imshow(cv2.cvtColor(image_cp1,cv2.COLOR_RGB2BGR))
+            plt.title('3X Amplified Mito Channel',fontsize=16)
+        else:
+            plt.subplot(121)
+            plt.imshow(cv2.cvtColor(image_cp1,cv2.COLOR_RGB2BGR))
+            plt.title('Mito Channel',fontsize=16)
         plt.axis('off')
 
         plt.subplot(122)
         plt.imshow(mito_bw)
         plt.axis('off')
-        plt.title('Mito channel after global thresholding')
+        plt.title('Global Mitochondrial Mask.\n Everything within the yellow masks would be captured and assigned to cells.',fontsize=16)
 
         if showimg:
 
@@ -867,10 +884,16 @@ def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_
 
             # Identifying mitochondria with obvious linking which need more accurate treatment
 
+            if entangled:
+                mito_bypass = 3000
+            else:
+                mito_bypass = 100000
+
+
             single_link_special_indices = []
             single_link_indices = sure_link_matrix[sure_link_matrix.sum(axis=1) == 1].index
             for i in single_link_indices:
-                if len(list_dict_mito[i]) > 2500:
+                if len(list_dict_mito[i]) > mito_bypass:
                     single_link_special_indices.append(i)
                     sure_link_matrix.loc[i] = 0
 
@@ -1043,12 +1066,12 @@ def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_
             #     x = np.array(list(map(lambda x: x[0],list_dict_nuc_temp[key])))
             #     y = np.array(list(map(lambda x: x[1],list_dict_nuc_temp[key])))
 
+            #     #Measuring the ratio of the mitochondrial network touching the frame
+            #     touching = (len(x[x<2]) + len(y[y<2]) + len(x[x>1022]) + len(y[y>1022]))
 
-            #     if ((len(x[x<4]) + len(y[y<4]) + len(x[x>1020]) + len(y[y>1020])) > 2000):
-            #         print((len(x[x<4]) + len(y[y<4]) + len(x[x>1020]) + len(y[y>1020])))
+            #     if (np.round(touching/(len(x)+len(y)),4) > 0.0025):
+            #         print('This needs work, may be we should only list it, and deal with it later.')
             #         quality_tags[key] = 'Bad'
-
-
 
             #################################################################
 
@@ -1107,9 +1130,9 @@ def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_
                         print()
                     except:
                         pass
-                    full_path_to_image = File_Path + '/to_analyze/' + namestring.strip('.tif') + '_cell{}_{}.tif'.format(i+1,singleCellMask.shape[0])
+                    full_path_to_image = File_Path + '/to_analyze/' + namestring.strip('.tif') + '_cell{}_{}.tif'.format(i+1,imageSize) #singleCellMask.shape[0]
                     cv2.imwrite(full_path_to_image , cv2.cvtColor(singleCellMask, cv2.COLOR_RGB2BGR))
-                    single_cell_QC(abspath, full_path_to_image ,hide)
+                    single_cell_QC(abspath, full_path_to_image, entangled, hide)
 
                 elif quality_tags[i+1] == 'Bad':
 
@@ -1120,7 +1143,7 @@ def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_
                     except:
                         pass
 
-                    cv2.imwrite(File_Path + '/to_discard/' + namestring.strip('.tif') + '_cell{}_{}.tif'.format(i+1,singleCellMask.shape[0]) , cv2.cvtColor(singleCellMask, cv2.COLOR_RGB2BGR))
+                    cv2.imwrite(File_Path + '/to_discard/' + namestring.strip('.tif') + '_cell{}_{}.tif'.format(i+1,imageSize) , cv2.cvtColor(singleCellMask, cv2.COLOR_RGB2BGR))
 
                 if hide == False:
                     # plt.figure(figsize=(10,10))
@@ -1136,7 +1159,7 @@ def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_
 
 # Garbage Collector and QC control for Cell Catcher export.
 # Garbage Collector and QC control for Cell Catcher export.
-def single_cell_QC(abspath, full_path_to_image ,hide=True):
+def single_cell_QC(abspath, full_path_to_image ,entangled,hide=True):
 
     # Creating Junkyard
     try:
@@ -1204,19 +1227,41 @@ def single_cell_QC(abspath, full_path_to_image ,hide=True):
         image_sc[:,:,2] = cv2.bitwise_and(image_sc[:,:,2],good_mask_sc)
 
         #Identifying and discarding cells that are touching image edges or missing mitochondria
+        #Finding cell boundary
+        xmx = np.max([np.max(np.where(image_sc[:,:,2].any(axis=1))[0]),np.max(np.where(image_sc[:,:,1].any(axis=1))[0])])
+        xmn = np.min([np.min(np.where(image_sc[:,:,2].any(axis=1))[0]),np.min(np.where(image_sc[:,:,1].any(axis=1))[0])])
+
+        ymx = np.max([np.max(np.where(image_sc[:,:,2].any(axis=0))[0]),np.max(np.where(image_sc[:,:,1].any(axis=0))[0])])
+        ymn = np.min([np.min(np.where(image_sc[:,:,2].any(axis=0))[0]),np.min(np.where(image_sc[:,:,1].any(axis=0))[0])])
 
         qc_mask = np.zeros(t2t_sc.shape, dtype="uint8")
-        qc_mask[4:1020,4:1020] = 255
-        qc_mask = 255 - qc_mask
+        qc_mask[xmx:,:] = 255
+        qc_mask[:xmn,:] = 255
+        qc_mask[:,ymx:] = 255
+        qc_mask[:,:ymn] = 255
 
-        edge_sum = np.sum(cv2.bitwise_and(image_sc[:,:,0],qc_mask)) + np.sum(cv2.bitwise_and(image_sc[:,:,1],qc_mask)) + np.sum(cv2.bitwise_and(image_sc[:,:,2],qc_mask))
+        c1 = cv2.bitwise_and(image_sc[:,:,0],qc_mask)
+        c2 = cv2.bitwise_and(image_sc[:,:,1],qc_mask)
+        c3 = cv2.bitwise_and(image_sc[:,:,2],qc_mask)
+        touch_count = len(c1[c1!=0]) + len(c2[c2!=0]) + len(c3[c3!=0])
+
         mito_sum = np.sum(image_sc[:,:,0]) + np.sum(image_sc[:,:,1])
-        print(full_path_to_image, mito_sum, abspath)
 
-        if (mito_sum < 50000) or (edge_sum) > 8:
+        if entangled:
+            touch_thresh = 50
+        else:
+            touch_thresh = 200
+
+        if ((mito_sum < 50000) or (len(c3[c3!=0]) > 2) or (touch_count > touch_thresh)):
             shutil.move(full_path_to_image, os.path.join(abspath,'to_discard', os.path.split(full_path_to_image)[1]))
-            print(f'Did not pass QC: {full_path_to_image}')
-            print(f'{full_path_to_image} discarded. (check "to_discard" direcoty)')
+            print(f'QC Failed: {full_path_to_image}')
+
+            if (len(c3[c3!=0]) > 5) or (touch_count > touch_thresh):
+                print('Reason: The cell is touching the image frame.', len(c3[c3!=0]),touch_count)
+
+            else:
+                print('Reason: Not enough mitochondrial content in the cell.')
+            print(f'{full_path_to_image} discarded. (moved to "to_discard" direcoty)\n')
 
         else:
             print(f'QC Passed: {full_path_to_image}')
@@ -1224,13 +1269,49 @@ def single_cell_QC(abspath, full_path_to_image ,hide=True):
             if hide == False:
                 plt.figure(figsize=(10,10))
                 plt.imshow(image_sc)
-                plt.title(f'{full_path_to_image}')
+                plt.title(f'{full_path_to_image}',fontsize=14)
 
             os.remove(full_path_to_image)
             cv2.imwrite(full_path_to_image , cv2.cvtColor(image_sc, cv2.COLOR_BGR2RGB))
     except:
-        print(f'Could not improve {full_path_to_image}')
+        print(f'Saving {full_path_to_image}')
         pass
+
+# Improve mito network quality for low signal images
+def improve_mito(img2):
+
+    img2[:,:,0] = 0
+
+    # Detecting Mitochondria Channel
+    red = img2[:,:,1]
+    rd_sm = np.sum(red)
+
+    mito_channel = img2[:,:,2]
+    gr_sm = np.sum(mito_channel)
+    ch = 2
+
+    if rd_sm > gr_sm:
+        ch = 1
+        mito_channel = red.copy()
+
+    img2 = cv2.normalize(img2, dst=None, alpha=0, beta=256, norm_type=cv2.NORM_MINMAX)
+    img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
+    tmp = np.reshape(img2, (1,-1))
+    h,b = np.histogram(tmp,bins=128)
+    b_diff = np.round(b[1]).astype('uint8')
+    img2 = img2 - b_diff
+
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+    img2 = clahe.apply(img2)
+
+    img2[img2>=0.9*np.max(img2)] = 0
+
+    #Removing noise resulted from filters
+    img2 = img2 * 1 - 1 * np.min(img2)#img2[:,:,0] * 2 - 2 * np.min(img2[:,:,0])
+
+    return ch,img2
+
+
 
 
 
@@ -1374,10 +1455,10 @@ def good_check(address):
         for file in list_of_cells:
             nuc_area = []
             bad_cell = False
-            if not(file.endswith('binarized.tif')):
+            if not(file.endswith('_mask.tif')):
 
                 img = cv2.imread(address+'/cells/processed/to_analyze/'+file)
-                img2 = cv2.imread(address+'/cells/processed/to_analyze/'+file[:file.rfind('.tif')]+'binarized.tif')
+                img2 = cv2.imread(address+'/cells/processed/to_analyze/'+file[:file.rfind('.tif')]+'_mask.tif')
                 img = img[:,:,0]
                 #_,im_bw = cv2.threshold(img, 15, 255, cv2.THRESH_BINARY )
 
@@ -1457,13 +1538,13 @@ def good_check(address):
                     print('Moving {} to bad folder.'.format(file))
 
                     os.rename(address+'/cells/processed/to_analyze/'+file, address+'/cells/processed/bad/'+file)
-                    os.rename(address+'/cells/processed/to_analyze/'+file[:file.rfind('.tif')]+'binarized.tif', address+'/cells/processed/bad/'+file[:file.rfind('.tif')]+'binarized.tif')
+                    os.rename(address+'/cells/processed/to_analyze/'+file[:file.rfind('.tif')]+'_mask.tif', address+'/cells/processed/bad/'+file[:file.rfind('.tif')]+'_mask.tif')
     except:
         pass
 
 
 def measurement(address,cell_list,output_filename):
-    database = pd.DataFrame([[0]*147], columns = ['cell_name','cell_mito_count', 'cell_total_mito_area','cell_mean_mito_area',
+    database = pd.DataFrame([[0]*110], columns = ['cell_name','cell_mito_count', 'cell_total_mito_area','cell_mean_mito_area',
                              'cell_median_mito_area','cell_std_mito_area','cell_mean_mito_eccentricity',
                              'cell_median_mito_eccentricity','cell_std_mito_eccentricity',
                              'cell_mean_mito_equi_diameter','cell_median_mito_equi_diameter',
@@ -1507,7 +1588,11 @@ def measurement(address,cell_list,output_filename):
                              'cell_weighted_skewness_squared','cell_network_orientation','cell_network_major_axis',
                              'cell_network_minor_axis', 'cell_network_eccentricity',
                              'cell_network_effective_extent','cell_network_effective_solidity',
-                             'cell_network_fractal_dimension','scale','mito_area','mito_centroid','mito_eccentricity',
+                             'cell_network_fractal_dimension','scale'])
+
+
+
+    database_raw = pd.DataFrame([[0]*39], columns = ['cell_name','scale','mito_area','mito_centroid','mito_eccentricity',
                              'mito_equi_diameter','mito_euler_number','mito_extent','mito_major_axis',
                              'mito_minor_axis','mito_orientation','mito_perimeter','mito_solidity',
                              'mito_centroid_x','mito_centroid_y','mito_distance','mito_weighted_cent_x',
@@ -1520,7 +1605,7 @@ def measurement(address,cell_list,output_filename):
                              'mito_weighted_distance','mito_form_factor' ,'mito_roundness'])
 
     for file in cell_list:
-        if 'binarized' in file:
+        if '_mask' in file:
 
             fullpath_input = file
             abspath = address
@@ -1530,7 +1615,7 @@ def measurement(address,cell_list,output_filename):
                 img = cv2.imread(abspath+'/output/processed/single_cells_binary/'+file)
                 img = img[:,:,0]
                 print('Now quantifying:', file)
-                scale = int(file[file.rfind('_')+1:file.rfind('binarized')])/1024
+                scale = int(file[file.rfind('_')+1:file.rfind('_mask')])/1024
 
                 #Mitochondria level measurements
 
@@ -1898,17 +1983,7 @@ def measurement(address,cell_list,output_filename):
                           cell_skewness_y, cell_weighted_skewness_y, cell_skewness_squared,
                           cell_weighted_skewness_squared, cell_network_orientation, cell_network_major_axis,
                           cell_network_minor_axis, cell_network_eccentricity, cell_network_effective_extent,
-                          cell_network_effective_solidity,cell_network_fractal_dimension, scale, mito_area,
-                          mito_centroid, mito_eccentricity, mito_equi_diameter, mito_euler_number,
-                          mito_extent, mito_major_axis, mito_minor_axis, mito_orientation, mito_perimeter,
-                          mito_solidity, mito_centroid_x, mito_centroid_y, mito_distance,
-                          mito_weighted_cent_x, mito_weighted_cent_y, mito_weighted_distance,
-                          mito_form_factor, mito_roundness, mito_branch_count, mito_total_branch_length,
-                          mito_mean_branch_length, mito_median_branch_length, mito_std_branch_length,
-                          mito_mean_branch_angle, mito_median_branch_angle,mito_std_branch_angle,
-                          mito_total_density, mito_average_density,mito_median_density, mito_branch_count,
-                          mito_distance, mito_weighted_cent_x, mito_weighted_cent_y, mito_weighted_distance,
-                          mito_form_factor, mito_roundness]],
+                          cell_network_effective_solidity,cell_network_fractal_dimension, scale]],
                           columns = ['cell_name','cell_mito_count', 'cell_total_mito_area' ,'cell_mean_mito_area',
                          'cell_median_mito_area','cell_std_mito_area','cell_mean_mito_eccentricity',
                          'cell_median_mito_eccentricity','cell_std_mito_eccentricity',
@@ -1953,7 +2028,20 @@ def measurement(address,cell_list,output_filename):
                          'cell_weighted_skewness_squared','cell_network_orientation','cell_network_major_axis',
                          'cell_network_minor_axis', 'cell_network_eccentricity',
                          'cell_network_effective_extent','cell_network_effective_solidity',
-                         'cell_network_fractal_dimension','scale','mito_area','mito_centroid','mito_eccentricity',
+                         'cell_network_fractal_dimension','scale'])
+
+                temp_dataset_raw = pd.DataFrame([[file,scale, mito_area, mito_centroid,
+                          mito_eccentricity, mito_equi_diameter, mito_euler_number, mito_extent,
+                          mito_major_axis, mito_minor_axis, mito_orientation, mito_perimeter,
+                          mito_solidity, mito_centroid_x, mito_centroid_y, mito_distance,
+                          mito_weighted_cent_x, mito_weighted_cent_y, mito_weighted_distance,
+                          mito_form_factor, mito_roundness, mito_branch_count, mito_total_branch_length,
+                          mito_mean_branch_length, mito_median_branch_length, mito_std_branch_length,
+                          mito_mean_branch_angle, mito_median_branch_angle,mito_std_branch_angle,
+                          mito_total_density, mito_average_density,mito_median_density, mito_branch_count,
+                          mito_distance, mito_weighted_cent_x, mito_weighted_cent_y, mito_weighted_distance,
+                          mito_form_factor, mito_roundness]],
+                          columns = ['cell_name', 'scale','mito_area','mito_centroid','mito_eccentricity',
                          'mito_equi_diameter','mito_euler_number','mito_extent','mito_major_axis',
                          'mito_minor_axis','mito_orientation','mito_perimeter','mito_solidity',
                          'mito_centroid_x','mito_centroid_y','mito_distance','mito_weighted_cent_x',
@@ -1964,531 +2052,22 @@ def measurement(address,cell_list,output_filename):
                          'mito_total_density','mito_average_density' ,'mito_median_density',
                          'mito_branch_count','mito_distance','mito_weighted_cent_x' ,'mito_weighted_cent_y',
                          'mito_weighted_distance','mito_form_factor' ,'mito_roundness'])
+
+
                 database = database.append(temp_dataset,ignore_index=True)
+                database_raw = database_raw.append(temp_dataset_raw,ignore_index=True)
             except:
                 print('Couldn\'t Analize {0}'.format(file))
 
     detail = str(datetime.datetime.now().year) + '-' + str(datetime.datetime.now().month) + '-' + str(datetime.datetime.now().day) + '-' + output_filename
     database.drop(database.index[0],inplace=True)
-    database.to_csv(address+'/'+detail+'.tsv', sep='\t')
+    database.to_csv(address+'/'+detail+'.csv', sep=',')
+
+    database_raw.drop(database_raw.index[0],inplace=True)
+    database_raw.to_csv(address+'/'+detail+'_raw.tsv', sep='\t')
 
     print('Done with Measurements!\nYour data is Ready! Enjoy :)')
 
-def measurement_parallel(address,summary,file,output_filename):
-    database = pd.DataFrame([[0]*147], columns = ['cell_name','cell_mito_count', 'cell_total_mito_area','cell_mean_mito_area',
-                             'cell_median_mito_area','cell_std_mito_area','cell_mean_mito_eccentricity',
-                             'cell_median_mito_eccentricity','cell_std_mito_eccentricity',
-                             'cell_mean_mito_equi_diameter','cell_median_mito_equi_diameter',
-                             'cell_std_mito_equi_diameter','cell_mean_mito_euler_number',
-                             'cell_median_mito_euler_number','cell_std_mito_euler_number','cell_mean_mito_extent',
-                             'cell_meadian_mito_extent','cell_std_mito_extent','cell_mean_mito_major_axis',
-                             'cell_median_mito_major_axis','cell_std_mito_major_axis','cell_mean_mito_minor_axis',
-                             'cell_median_mito_minor_axis','cell_std_mito_minor_axis','cell_mean_mito_orientation',
-                             'cell_median_mito_orientation','cell_std_mito_orientation','cell_mean_mito_perimeter',
-                             'cell_median_mito_perimeter','cell_std_mito_perimeter','cell_mean_mito_solidity',
-                             'cell_median_mito_solidity','cell_std_mito_solidity','cell_mean_mito_centroid_x',
-                             'cell_median_mito_centroid_x','cell_std_mito_centroid_x','cell_mean_mito_centroid_y',
-                             'cell_median_mito_centroid_y','cell_std_mito_centroid_y','cell_mean_mito_distance',
-                             'cell_median_mito_distance','cell_std_mito_distance','cell_mean_mito_weighted_cent_x',
-                             'cell_median_mito_weighted_cent_x','cell_std_mito_weighted_cent_x',
-                             'cell_mean_mito_weighted_cent_y','cell_median_mito_weighted_cent_y',
-                             'cell_std_mito_weighted_cent_y','cell_mean_mito_weighted_distance',
-                             'cell_median_mito_weighted_distance','cell_std_mito_weighted_distance',
-                             'cell_mean_mito_form_factor','cell_median_mito_form_factor',
-                             'cell_std_mito_form_factor','cell_mean_mito_roundness','cell_median_mito_roundness',
-                             'cell_std_mito_roundness','cell_mean_mito_branch_count','cell_median_mito_branch_count',
-                             'cell_std_mito_branch_count','cell_mean_mito_mean_branch_length',
-                             'cell_median_mito_mean_branch_length','cell_std_mito_mean_branch_length',
-                             'cell_mean_mito_total_branch_length','cell_median_mito_total_branch_length',
-                             'cell_std_mito_total_branch_length','cell_mean_mito_median_branch_length',
-                             'cell_median_mito_median_branch_length','cell_std_mito_median_branch_length',
-                             'cell_mean_mito_std_branch_length','cell_median_mito_std_branch_length',
-                             'cell_std_mito_std_branch_length','cell_mean_mito_mean_branch_angle',
-                             'cell_median_mito_mean_branch_angle','cell_std_mito_mean_branch_angle',
-                             'cell_mean_mito_median_branch_angle','cell_median_mito_median_branch_angle',
-                             'cell_std_mito_median_branch_angle','cell_mean_mito_std_branch_angle',
-                             'cell_median_mito_std_branch_angle','cell_std_mito_std_branch_angle',
-                             'cell_mean_mito_total_density','cell_median_mito_total_density',
-                             'cell_std_mito_total_density','cell_mean_mito_average_density',
-                             'cell_median_mito_average_density','cell_std_mito_average_density',
-                             'cell_mean_mito_median_density','cell_median_mito_median_density',
-                             'cell_std_mito_median_density','cell_kurtosis_x','cell_weighted_kurtosis_x',
-                             'cell_kurtosis_y','cell_weighted_kurtosis_y','cell_kurtosis_squared',
-                             'cell_weighted_kurtosis_squared','cell_skewness_x','cell_weighted_skewness_x',
-                             'cell_skewness_y','cell_weighted_skewness_y','cell_skewness_squared',
-                             'cell_weighted_skewness_squared','cell_network_orientation','cell_network_major_axis',
-                             'cell_network_minor_axis', 'cell_network_eccentricity',
-                             'cell_network_effective_extent','cell_network_effective_solidity',
-                             'cell_network_fractal_dimension','scale','mito_area','mito_centroid','mito_eccentricity',
-                             'mito_equi_diameter','mito_euler_number','mito_extent','mito_major_axis',
-                             'mito_minor_axis','mito_orientation','mito_perimeter','mito_solidity',
-                             'mito_centroid_x','mito_centroid_y','mito_distance','mito_weighted_cent_x',
-                             'mito_weighted_cent_y','mito_weighted_distance','mito_form_factor',
-                             'mito_roundness','mito_branch_count','mito_total_branch_length',
-                             'mito_mean_branch_length','mito_median_branch_length','mito_std_branch_length',
-                             'mito_mean_branch_angle','mito_median_branch_angle','mito_std_branch_angle',
-                             'mito_total_density','mito_average_density' ,'mito_median_density',
-                             'mito_branch_count','mito_distance','mito_weighted_cent_x' ,'mito_weighted_cent_y',
-                             'mito_weighted_distance','mito_form_factor' ,'mito_roundness'])
-
-    if 'binarized' in file:
-
-        fullpath_input = file
-        abspath = address
-
-        try:
-            print(file)
-            img = cv2.imread(abspath+'/cells/processed/single_cells_binary/'+file)
-            img = img[:,:,0]
-            print('Now quantifying:', file)
-            scale = int(file[file.rfind('_')+1:file.rfind('binarized')])/1024
-
-            #Mitochondria level measurements
-
-            mito_labels = measure.label(np.array(img),connectivity=2)
-            mito_props = regionprops(mito_labels)
-
-            mito_area = []
-            mito_centroid = []
-            mito_eccentricity = []
-            mito_equi_diameter = []
-            mito_euler_number = []
-            mito_extent = []
-            mito_major_axis = []
-            mito_minor_axis = []
-            mito_orientation = []
-            mito_perimeter = []
-            mito_solidity = []
-            mito_centroid_x = []
-            mito_centroid_y = []
-            mito_distance = []
-            mito_weighted_cent_x = []
-            mito_weighted_cent_y = []
-            mito_weighted_distance = []
-            mito_form_factor = []
-            mito_roundness = []
-            mito_branch_count = []
-            mito_total_branch_length = []
-            mito_mean_branch_length = []
-            mito_median_branch_length = []
-            mito_std_branch_length = []
-            mito_mean_branch_angle = []
-            mito_median_branch_angle = []
-            mito_std_branch_angle = []
-            mito_total_density = []
-            mito_average_density = []
-            mito_median_density = []
-            mito_branch_count = []
-
-            for r in range(len(mito_props)):
-                if mito_props[r].area > 16:
-
-                    mito_area.append(mito_props[r].area)
-                    mito_eccentricity.append(mito_props[r].eccentricity)
-                    mito_equi_diameter.append(mito_props[r].equivalent_diameter)
-                    mito_euler_number.append(mito_props[r].euler_number)
-                    mito_extent.append(mito_props[r].extent)
-                    mito_major_axis.append(mito_props[r].major_axis_length)
-                    mito_minor_axis.append(mito_props[r].minor_axis_length)
-                    mito_orientation.append(mito_props[r].orientation)
-                    mito_perimeter.append(mito_props[r].perimeter)
-                    mito_solidity.append(mito_props[r].solidity)
-                    mito_centroid.append(mito_props[r].centroid)
-                    mito_centroid_x.append(mito_props[r].centroid[0])
-                    mito_centroid_y.append(mito_props[r].centroid[1])
-
-                    if mito_props[r].label == 0:
-                            continue
-
-                    else:
-                        labelMask = np.zeros(img.shape, dtype="uint8")
-                        labelMask[mito_labels == mito_props[r].label] = 255
-                        #print('lebel1', mito_props[r].label)
-
-                        BranchPointsPositions = []
-                        branch_points_ctr = []
-                        num_branch_points = 0
-                        number_branches = 0
-                        branch_length = []
-                        branch_angle = []
-
-                        try:
-                            #Finding the Skeleton
-                            imagebw8 = labelMask
-                            imagebw8 = imagebw8.astype(np.int32)
-
-                            Skel2 = thin(labelMask)
-                            Skel2 = 255 * Skel2
-
-                            branch_pointsn = getSkeletonIntersection(Skel2)
-                            number_branchpoints = len(branch_pointsn)
-
-                            #Recreating Branch Points
-                            bp = np.zeros(shape=(imagebw8.shape[0], imagebw8.shape[1]), dtype=np.uint8)
-
-                            for ii in range(len(branch_pointsn)):
-                                xi = branch_pointsn[ii][0]
-                                yi = branch_pointsn[ii][1]
-                                # print(xi,yi)
-                                BranchPointsPositions.append([yi, xi])
-                                bp[yi, xi] = 255
-
-                            kernelbp = np.ones((3, 3), np.uint8)
-                            IM = cv2.dilate(bp, kernelbp, iterations=1)
-
-
-                            #Finding independent branches
-                            BranchLengthMatrix = Skel2 - IM
-                            BranchMatrix = BranchLengthMatrix > 0
-
-                            imagebwlabels2 = measure.label(np.array(BranchMatrix),connectivity = 2)
-                            NUMimagebw1 = imagebwlabels2.max()
-
-                            propsbmm = regionprops(imagebwlabels2)
-
-                            dist_transform2 = cv2.distanceTransform(labelMask,cv2.DIST_L2,5)
-                            #print('label2',mito_props[r].label)
-                            for rq in range(len(propsbmm)):
-                                branch_length.append((propsbmm[rq].area)+4)
-                                #print('label3',mito_props[r].label)
-                                branch_angle.append(propsbmm[rq].orientation)
-                                #print('orientation ',propsbmm[rq].orientation)
-                                #print('eanch angle ', branch_angle)
-
-                            if len(branch_length) == 1:
-                                #print('initial bl', branch_length)
-                                branch_length[0] =  mito_props[r].major_axis_length
-                                #print('new bl',branch_length)
-
-                            branch_angle = np.multiply(branch_angle,(180/np.pi))
-                            num_branch_points = number_branchpoints
-                            number_branches = NUMimagebw1
-                            total_branch_length = np.sum(branch_length)
-                            mean_branch_length = np.mean(branch_length)
-                            median_branch_length = np.median(branch_length)
-                            std_branch_length = np.std(branch_length)
-                            mean_branch_angle = np.mean(branch_angle)
-                            median_branch_angle = np.median(branch_angle)
-                            std_branch_angle = np.std(branch_angle)
-
-                        except:
-                            branch_points_ctr.append([])
-                            num_branch_points = 0
-                            number_branches = 0
-                            branch_length.append([])
-                            branch_angle.append([])
-
-                            total_branch_length = 0
-                            mean_branch_length = 0
-                            median_branch_length = 0
-                            std_branch_length = 0
-                            mean_branch_angle = 0
-                            median_branch_angle = 0
-                            std_branch_angle = 0
-
-                if mito_props[r].area > 16:
-                    mito_branch_count.append(number_branches)
-
-                    mito_total_branch_length.append(total_branch_length)
-                    mito_mean_branch_length.append(mean_branch_length)
-                    mito_median_branch_length.append(median_branch_length)
-                    mito_std_branch_length.append(std_branch_length)
-                    mito_mean_branch_angle.append(mean_branch_angle)
-                    mito_median_branch_angle.append(median_branch_angle)
-                    mito_std_branch_angle.append(std_branch_angle)
-
-                    mito_total_density.append(np.sum(dist_transform2[dist_transform2>0]))
-                    mito_average_density.append(np.mean(dist_transform2[dist_transform2>0]))
-                    mito_median_density.append(np.median(dist_transform2[dist_transform2>0]))
-
-            mito_area = np.multiply(np.power(scale,2),mito_area)
-            mito_equi_diameter = np.multiply(scale,mito_equi_diameter)
-            mito_major_axis = np.multiply(scale,mito_major_axis)
-            mito_minor_axis = np.multiply(scale,mito_minor_axis)
-            mito_perimeter = np.multiply(scale,mito_perimeter)
-            mito_centroid_x = np.multiply(scale,mito_centroid_x)
-            mito_centroid_y = np.multiply(scale,mito_centroid_y)
-
-            mito_distance = np.sqrt(np.power(mito_centroid_x,2)+np.power(mito_centroid_y,2))
-            mito_weighted_cent_x = np.divide(np.multiply(mito_centroid_x,mito_area),np.sum(mito_area))
-            mito_weighted_cent_y = np.divide(np.multiply(mito_centroid_y,mito_area),np.sum(mito_area))
-            mito_weighted_distance = np.sqrt(np.power(mito_weighted_cent_x,2)+np.power(mito_weighted_cent_y,2))
-            mito_form_factor = (np.divide(np.power(mito_perimeter,2),mito_area))/(4*np.pi)
-            mito_roundness = ((4/np.pi)*np.divide(mito_area, np.power(mito_major_axis,2)))
-
-            mito_total_branch_length = np.multiply(scale,mito_total_branch_length)
-            mito_mean_branch_length = np.multiply(scale,mito_mean_branch_length)
-            mito_median_branch_length = np.multiply(scale,mito_median_branch_length)
-            mito_std_branch_length = np.multiply(scale,mito_std_branch_length)
-            mito_total_density = np.multiply(scale,mito_total_density)
-            mito_average_density = np.multiply(scale,mito_average_density)
-            mito_median_density = np.multiply(scale,mito_median_density)
-
-            #Cell level measurements
-            cell_mito_count = len(mito_area)
-            cell_total_mito_area = np.sum(mito_area)
-            cell_mean_mito_area = np.mean(mito_area)
-            cell_median_mito_area = np.median(mito_area)
-            cell_std_mito_area = np.std(mito_area)
-            cell_mean_mito_eccentricity = np.mean(mito_eccentricity)
-            cell_median_mito_eccentricity = np.median(mito_eccentricity)
-            cell_std_mito_eccentricity = np.std(mito_eccentricity)
-            cell_mean_mito_equi_diameter = np.mean(mito_equi_diameter)
-            cell_median_mito_equi_diameter = np.median(mito_equi_diameter)
-            cell_std_mito_equi_diameter = np.std(mito_equi_diameter)
-            cell_mean_mito_euler_number = np.mean(mito_euler_number)
-            cell_median_mito_euler_number = np.median(mito_euler_number)
-            cell_std_mito_euler_number = np.std(mito_euler_number)
-            cell_mean_mito_extent = np.mean(mito_extent)
-            cell_meadian_mito_extent = np.median(mito_extent)
-            cell_std_mito_extent = np.std(mito_extent)
-            cell_mean_mito_major_axis = np.mean(mito_major_axis)
-            cell_median_mito_major_axis = np.median(mito_major_axis)
-            cell_std_mito_major_axis = np.std(mito_major_axis)
-            cell_mean_mito_minor_axis = np.mean(mito_minor_axis)
-            cell_median_mito_minor_axis = np.median(mito_minor_axis)
-            cell_std_mito_minor_axis = np.std(mito_minor_axis)
-            cell_mean_mito_orientation = np.mean(mito_orientation)
-            cell_median_mito_orientation = np.median(mito_orientation)
-            cell_std_mito_orientation = np.std(mito_orientation)
-            cell_mean_mito_perimeter = np.mean(mito_perimeter)
-            cell_median_mito_perimeter = np.median(mito_perimeter)
-            cell_std_mito_perimeter = np.std(mito_perimeter)
-            cell_mean_mito_solidity = np.mean(mito_solidity)
-            cell_median_mito_solidity = np.median(mito_solidity)
-            cell_std_mito_solidity = np.std(mito_solidity)
-            cell_mean_mito_centroid_x = np.mean(mito_centroid_x)
-            cell_median_mito_centroid_x = np.median(mito_centroid_x)
-            cell_std_mito_centroid_x = np.std(mito_centroid_x)
-            cell_mean_mito_centroid_y = np.mean(mito_centroid_y)
-            cell_median_mito_centroid_y = np.median(mito_centroid_y)
-            cell_std_mito_centroid_y = np.std(mito_centroid_y)
-            cell_mean_mito_distance = np.mean(mito_distance)
-            cell_median_mito_distance = np.median(mito_distance)
-            cell_std_mito_distance = np.std(mito_distance)
-            cell_mean_mito_weighted_cent_x = np.mean(mito_weighted_cent_x)
-            cell_median_mito_weighted_cent_x = np.median(mito_weighted_cent_x)
-            cell_std_mito_weighted_cent_x = np.std(mito_weighted_cent_x)
-            cell_mean_mito_weighted_cent_y = np.mean(mito_weighted_cent_y)
-            cell_median_mito_weighted_cent_y = np.median(mito_weighted_cent_y)
-            cell_std_mito_weighted_cent_y = np.std(mito_weighted_cent_y)
-            cell_mean_mito_weighted_distance = np.mean(mito_weighted_distance)
-            cell_median_mito_weighted_distance = np.median(mito_weighted_distance)
-            cell_std_mito_weighted_distance = np.std(mito_weighted_distance)
-            cell_mean_mito_form_factor = np.mean(mito_form_factor)
-            cell_median_mito_form_factor = np.median(mito_form_factor)
-            cell_std_mito_form_factor = np.std(mito_form_factor)
-            cell_mean_mito_roundness = np.mean(mito_roundness)
-            cell_median_mito_roundness = np.median(mito_roundness)
-            cell_std_mito_roundness = np.std(mito_roundness)
-            cell_mean_mito_branch_count = np.mean(mito_branch_count)
-            cell_median_mito_branch_count = np.median(mito_branch_count)
-            cell_std_mito_branch_count = np.std(mito_branch_count)
-            cell_mean_mito_mean_branch_length = np.mean(mito_mean_branch_length)
-            cell_median_mito_mean_branch_length = np.median(mito_mean_branch_length)
-            cell_std_mito_mean_branch_length = np.std(mito_mean_branch_length)
-            cell_mean_mito_total_branch_length = np.mean(mito_total_branch_length)
-            cell_median_mito_total_branch_length = np.median(mito_total_branch_length)
-            cell_std_mito_total_branch_length = np.std(mito_total_branch_length)
-            cell_mean_mito_median_branch_length = np.mean(mito_median_branch_length)
-            cell_median_mito_median_branch_length = np.median(mito_median_branch_length)
-            cell_std_mito_median_branch_length = np.std(mito_median_branch_length)
-            cell_mean_mito_std_branch_length = np.mean(mito_std_branch_length)
-            cell_median_mito_std_branch_length = np.median(mito_std_branch_length)
-            cell_std_mito_std_branch_length = np.std(mito_std_branch_length)
-            cell_mean_mito_mean_branch_angle = np.mean(mito_mean_branch_angle)
-            cell_median_mito_mean_branch_angle = np.median(mito_mean_branch_angle)
-            cell_std_mito_mean_branch_angle = np.std(mito_mean_branch_angle)
-            cell_mean_mito_median_branch_angle = np.mean(mito_median_branch_angle)
-            cell_median_mito_median_branch_angle = np.median(mito_median_branch_angle)
-            cell_std_mito_median_branch_angle = np.std(mito_median_branch_angle)
-            cell_mean_mito_std_branch_angle = np.mean(mito_std_branch_angle)
-            cell_median_mito_std_branch_angle = np.median(mito_std_branch_angle)
-            cell_std_mito_std_branch_angle = np.std(mito_std_branch_angle)
-            cell_mean_mito_total_density = np.mean(mito_total_density)
-            cell_median_mito_total_density = np.median(mito_total_density)
-            cell_std_mito_total_density = np.std(mito_total_density)
-            cell_mean_mito_average_density = np.mean(mito_average_density)
-            cell_median_mito_average_density = np.median(mito_average_density)
-            cell_std_mito_average_density = np.std(mito_average_density)
-            cell_mean_mito_median_density = np.mean(mito_median_density)
-            cell_median_mito_median_density = np.median(mito_median_density)
-            cell_std_mito_median_density = np.std(mito_median_density)
-            cell_kurtosis_x = kurtosis(mito_centroid_x)
-            cell_weighted_kurtosis_x = kurtosis(mito_weighted_cent_x)
-            cell_kurtosis_y = kurtosis(mito_centroid_y)
-            cell_weighted_kurtosis_y = kurtosis(mito_weighted_cent_y)
-            cell_kurtosis_squared = np.add(np.power(cell_kurtosis_x,2),np.power(cell_kurtosis_y,2))
-            cell_weighted_kurtosis_squared = np.add(np.power(cell_weighted_kurtosis_x,2),np.power(cell_weighted_kurtosis_y,2))
-            cell_skewness_x = skew(mito_centroid_x)
-            cell_weighted_skewness_x = skew(mito_weighted_cent_x)
-            cell_skewness_y = skew(mito_centroid_y)
-            cell_weighted_skewness_y = skew(mito_weighted_cent_y)
-            cell_skewness_squared = np.add(np.power(cell_skewness_x,2),np.power(cell_skewness_y,2))
-            cell_weighted_skewness_squared = np.add(np.power(cell_weighted_skewness_x,2),np.power(cell_weighted_skewness_y,2))
-
-            chull = convex_hull_image(img)
-
-            cell_labels = measure.label(np.array(chull),connectivity=2)
-            cell_props = regionprops(cell_labels)
-            cell_network_orientation = cell_props[0].orientation * 180/np.pi
-            cell_network_major_axis = cell_props[0].major_axis_length
-            cell_network_minor_axis = cell_props[0].minor_axis_length
-            cell_network_eccentricity = cell_props[0].eccentricity
-
-            cell_scaled_area = np.multiply(np.power(scale,2),cell_props[0].area)
-            cell_network_effective_extent = (np.sum(mito_area)/cell_scaled_area) * cell_props[0].extent
-            cell_network_effective_solidity = np.sum(mito_area)/cell_scaled_area
-
-            cell_network_major_axis = np.multiply(scale,cell_network_major_axis)
-            cell_network_minor_axis = np.multiply(scale,cell_network_minor_axis)
-
-            pixels=[]
-
-            for i in range(img.shape[0]):
-                for j in range(img.shape[1]):
-                    if img[i,j]>0:
-                        pixels.append((i,j))
-
-            Lx=img.shape[1]
-            Ly=img.shape[0]
-
-            pixels=np.array(pixels)
-
-            scales=np.logspace(0.01, 1, num=10, endpoint=False, base=2)
-            Ns=[]
-            for scale1 in scales:
-
-                H, edges=np.histogramdd(pixels, bins=(np.arange(0,Lx,scale1),np.arange(0,Ly,scale1)))
-                Ns.append(np.sum(H>0))
-
-            coeffs=np.polyfit(np.log(scales), np.log(Ns), 1)
-            cell_network_fractal_dimension = -coeffs[0]
-
-            temp_dataset = pd.DataFrame([[file, cell_mito_count, cell_total_mito_area, cell_mean_mito_area,
-                      cell_median_mito_area, cell_std_mito_area, cell_mean_mito_eccentricity,
-                      cell_median_mito_eccentricity, cell_std_mito_eccentricity,
-                      cell_mean_mito_equi_diameter, cell_median_mito_equi_diameter,
-                      cell_std_mito_equi_diameter, cell_mean_mito_euler_number,
-                      cell_median_mito_euler_number, cell_std_mito_euler_number,
-                      cell_mean_mito_extent ,cell_meadian_mito_extent, cell_std_mito_extent,
-                      cell_mean_mito_major_axis, cell_median_mito_major_axis, cell_std_mito_major_axis,
-                      cell_mean_mito_minor_axis, cell_median_mito_minor_axis,cell_std_mito_minor_axis,
-                      cell_mean_mito_orientation, cell_median_mito_orientation, cell_std_mito_orientation,
-                      cell_mean_mito_perimeter, cell_median_mito_perimeter,cell_std_mito_perimeter,
-                      cell_mean_mito_solidity, cell_median_mito_solidity, cell_std_mito_solidity,
-                      cell_mean_mito_centroid_x, cell_median_mito_centroid_x, cell_std_mito_centroid_x,
-                      cell_mean_mito_centroid_y, cell_median_mito_centroid_y,cell_std_mito_centroid_y,
-                      cell_mean_mito_distance, cell_median_mito_distance, cell_std_mito_distance,
-                      cell_mean_mito_weighted_cent_x, cell_median_mito_weighted_cent_x,
-                      cell_std_mito_weighted_cent_x, cell_mean_mito_weighted_cent_y,
-                      cell_median_mito_weighted_cent_y, cell_std_mito_weighted_cent_y,
-                      cell_mean_mito_weighted_distance, cell_median_mito_weighted_distance,
-                      cell_std_mito_weighted_distance, cell_mean_mito_form_factor,
-                      cell_median_mito_form_factor, cell_std_mito_form_factor,
-                      cell_mean_mito_roundness, cell_median_mito_roundness, cell_std_mito_roundness,
-                      cell_mean_mito_branch_count, cell_median_mito_branch_count,
-                      cell_std_mito_branch_count, cell_mean_mito_mean_branch_length,
-                      cell_median_mito_mean_branch_length, cell_std_mito_mean_branch_length,
-                      cell_mean_mito_total_branch_length, cell_median_mito_total_branch_length,
-                      cell_std_mito_total_branch_length, cell_mean_mito_median_branch_length,
-                      cell_median_mito_median_branch_length, cell_std_mito_median_branch_length,
-                      cell_mean_mito_std_branch_length, cell_median_mito_std_branch_length,
-                      cell_std_mito_std_branch_length, cell_mean_mito_mean_branch_angle,
-                      cell_median_mito_mean_branch_angle, cell_std_mito_mean_branch_angle,
-                      cell_mean_mito_median_branch_angle, cell_median_mito_median_branch_angle,
-                      cell_std_mito_median_branch_angle, cell_mean_mito_std_branch_angle,
-                      cell_median_mito_std_branch_angle,cell_std_mito_std_branch_angle,
-                      cell_mean_mito_total_density,cell_median_mito_total_density,
-                      cell_std_mito_total_density,cell_mean_mito_average_density,
-                      cell_median_mito_average_density, cell_std_mito_average_density,
-                      cell_mean_mito_median_density, cell_median_mito_median_density,
-                      cell_std_mito_median_density, cell_kurtosis_x, cell_weighted_kurtosis_x,
-                      cell_kurtosis_y, cell_weighted_kurtosis_y, cell_kurtosis_squared,
-                      cell_weighted_kurtosis_squared, cell_skewness_x, cell_weighted_skewness_x,
-                      cell_skewness_y, cell_weighted_skewness_y, cell_skewness_squared,
-                      cell_weighted_skewness_squared, cell_network_orientation, cell_network_major_axis,
-                      cell_network_minor_axis, cell_network_eccentricity, cell_network_effective_extent,
-                      cell_network_effective_solidity,cell_network_fractal_dimension, scale, mito_area,
-                      mito_centroid, mito_eccentricity, mito_equi_diameter, mito_euler_number,
-                      mito_extent, mito_major_axis, mito_minor_axis, mito_orientation, mito_perimeter,
-                      mito_solidity, mito_centroid_x, mito_centroid_y, mito_distance,
-                      mito_weighted_cent_x, mito_weighted_cent_y, mito_weighted_distance,
-                      mito_form_factor, mito_roundness, mito_branch_count, mito_total_branch_length,
-                      mito_mean_branch_length, mito_median_branch_length, mito_std_branch_length,
-                      mito_mean_branch_angle, mito_median_branch_angle,mito_std_branch_angle,
-                      mito_total_density, mito_average_density,mito_median_density, mito_branch_count,
-                      mito_distance, mito_weighted_cent_x, mito_weighted_cent_y, mito_weighted_distance,
-                      mito_form_factor, mito_roundness]],
-                      columns = ['cell_name','cell_mito_count', 'cell_total_mito_area' ,'cell_mean_mito_area',
-                     'cell_median_mito_area','cell_std_mito_area','cell_mean_mito_eccentricity',
-                     'cell_median_mito_eccentricity','cell_std_mito_eccentricity',
-                     'cell_mean_mito_equi_diameter','cell_median_mito_equi_diameter',
-                     'cell_std_mito_equi_diameter','cell_mean_mito_euler_number',
-                     'cell_median_mito_euler_number','cell_std_mito_euler_number','cell_mean_mito_extent',
-                     'cell_meadian_mito_extent','cell_std_mito_extent','cell_mean_mito_major_axis',
-                     'cell_median_mito_major_axis','cell_std_mito_major_axis','cell_mean_mito_minor_axis',
-                     'cell_median_mito_minor_axis','cell_std_mito_minor_axis','cell_mean_mito_orientation',
-                     'cell_median_mito_orientation','cell_std_mito_orientation','cell_mean_mito_perimeter',
-                     'cell_median_mito_perimeter','cell_std_mito_perimeter','cell_mean_mito_solidity',
-                     'cell_median_mito_solidity','cell_std_mito_solidity','cell_mean_mito_centroid_x',
-                     'cell_median_mito_centroid_x','cell_std_mito_centroid_x','cell_mean_mito_centroid_y',
-                     'cell_median_mito_centroid_y','cell_std_mito_centroid_y','cell_mean_mito_distance',
-                     'cell_median_mito_distance','cell_std_mito_distance','cell_mean_mito_weighted_cent_x',
-                     'cell_median_mito_weighted_cent_x','cell_std_mito_weighted_cent_x',
-                     'cell_mean_mito_weighted_cent_y','cell_median_mito_weighted_cent_y',
-                     'cell_std_mito_weighted_cent_y','cell_mean_mito_weighted_distance',
-                     'cell_median_mito_weighted_distance','cell_std_mito_weighted_distance',
-                     'cell_mean_mito_form_factor','cell_median_mito_form_factor',
-                     'cell_std_mito_form_factor','cell_mean_mito_roundness','cell_median_mito_roundness',
-                     'cell_std_mito_roundness','cell_mean_mito_branch_count','cell_median_mito_branch_count',
-                     'cell_std_mito_branch_count','cell_mean_mito_mean_branch_length',
-                     'cell_median_mito_mean_branch_length','cell_std_mito_mean_branch_length',
-                     'cell_mean_mito_total_branch_length','cell_median_mito_total_branch_length',
-                     'cell_std_mito_total_branch_length','cell_mean_mito_median_branch_length',
-                     'cell_median_mito_median_branch_length','cell_std_mito_median_branch_length',
-                     'cell_mean_mito_std_branch_length','cell_median_mito_std_branch_length',
-                     'cell_std_mito_std_branch_length','cell_mean_mito_mean_branch_angle',
-                     'cell_median_mito_mean_branch_angle','cell_std_mito_mean_branch_angle',
-                     'cell_mean_mito_median_branch_angle','cell_median_mito_median_branch_angle',
-                     'cell_std_mito_median_branch_angle','cell_mean_mito_std_branch_angle',
-                     'cell_median_mito_std_branch_angle','cell_std_mito_std_branch_angle',
-                     'cell_mean_mito_total_density','cell_median_mito_total_density',
-                     'cell_std_mito_total_density','cell_mean_mito_average_density',
-                     'cell_median_mito_average_density','cell_std_mito_average_density',
-                     'cell_mean_mito_median_density','cell_median_mito_median_density',
-                     'cell_std_mito_median_density','cell_kurtosis_x','cell_weighted_kurtosis_x',
-                     'cell_kurtosis_y','cell_weighted_kurtosis_y','cell_kurtosis_squared',
-                     'cell_weighted_kurtosis_squared','cell_skewness_x','cell_weighted_skewness_x',
-                     'cell_skewness_y','cell_weighted_skewness_y','cell_skewness_squared',
-                     'cell_weighted_skewness_squared','cell_network_orientation','cell_network_major_axis',
-                     'cell_network_minor_axis', 'cell_network_eccentricity',
-                     'cell_network_effective_extent','cell_network_effective_solidity',
-                     'cell_network_fractal_dimension','scale','mito_area','mito_centroid','mito_eccentricity',
-                     'mito_equi_diameter','mito_euler_number','mito_extent','mito_major_axis',
-                     'mito_minor_axis','mito_orientation','mito_perimeter','mito_solidity',
-                     'mito_centroid_x','mito_centroid_y','mito_distance','mito_weighted_cent_x',
-                     'mito_weighted_cent_y','mito_weighted_distance','mito_form_factor',
-                     'mito_roundness','mito_branch_count','mito_total_branch_length',
-                     'mito_mean_branch_length','mito_median_branch_length','mito_std_branch_length',
-                     'mito_mean_branch_angle','mito_median_branch_angle','mito_std_branch_angle',
-                     'mito_total_density','mito_average_density' ,'mito_median_density',
-                     'mito_branch_count','mito_distance','mito_weighted_cent_x' ,'mito_weighted_cent_y',
-                     'mito_weighted_distance','mito_form_factor' ,'mito_roundness'])
-            database = database.append(temp_dataset,ignore_index=True)
-        except:
-            print('Couldn\'t Analize {0}'.format(file))
-
-    detail = str(datetime.datetime.now().year) + '-' + str(datetime.datetime.now().month) + '-' + str(datetime.datetime.now().day) + '-' + output_filename
-    database.drop(database.index[0],inplace=True)
-    try:
-        summary.to_csv(address+'/'+detail+'summary.csv')
-    except:
-        print('No summary availale for this mode')
-        pass
-    database.to_csv(address+'/'+detail+'.tsv', sep='\t')
-
-    print('Done with Measurements!\nYour data is Ready! Enjoy :)')
 
 #Measuring Mahalanobis distance
 def mahalanobis(x=None, data=None, cov=None):
@@ -2523,7 +2102,8 @@ def check_requirements_miner(plan,address):
                         counter += 1
                 except:
                     pass
-            print(f'\nWe found {counter} images based on your plan. It seems your are all set!')
+            print(f'\nWe found {counter} images based on your plan.')
+
             if counter == 0:
                 print('\n>>> Are you sure that you have already used Cell Catcher to separate cells from your images?')
                 print(f'\n>>> There are no files in {os.path.join(address, "output", "to_analyze")}')
@@ -2626,6 +2206,8 @@ catcher_initial_params = {
 'correct_cells' : [True],
 'neighorhood' : [45],
 'mito_threshold' : [65],
+'mito_low' : [False],
+'sparse' : [True],
 }
 
 mito_miner_initial_params = {
@@ -2645,14 +2227,18 @@ mito_miner_initial_params = {
 'remove_debries_th' : [True],
 }
 
-def filter_plot_mito_miner(pic,binarized):
+def filter_plot_mito_miner(pic,binarized,diffused):
     plt.figure(figsize=(20,20))
     plt.subplot(121)
-    plt.title('Original image')
-    plt.imshow(pic,'gray')
+    if diffused:
+        plt.title('3X Brighter Original Image',fontsize=16)
+        plt.imshow(pic*3,'gray')
+    else:
+        plt.title('Original Image',fontsize=16)
+        plt.imshow(pic,'gray')
     plt.axis('off')
     plt.subplot(122)
-    plt.title('Binarized Image')
+    plt.title('Mitochondrial Network Mask',fontsize=16)
     plt.axis('off')
     plt.imshow(binarized,'gray')
     plt.show()
