@@ -13,12 +13,15 @@
   - ##### Nuc Adder
 
 
-###### User Interface
+##### User Interface
 All the tools in CeMiA toolkit offer interactive, semi graphical user interface through Jupyter notebooks.
-###### Processing
-All the tools analyze one cell at a time. However, Cell Catcher and Mito Miner, benefit from Multi-Threading, where applicable, to enhance the performance.
-###### Requirements
+##### Processing
+In the current version, all the tools analyze one cell at a time using the CPU. Currently we have a beta version of Cell Catcher and Mito Miner that benefit from Multi-Threading, where applicable, to enhance the performance. Once they are fully tested, we will release them in this repository.
+##### Software Requirements
+Follow these instructions if you do not have Anaconda or Jupyter notebooks installed on your computer.
+</br>
   - CeMiA toolkit is developed in Jupyter notebooks using Python 3. Since it benefits from a wide range of Python libraries, along with Jupyter notebooks, we suggest installing Anaconda distribution of Python (V 3.7). --> [Download Anaconda](https://www.anaconda.com/distribution/)
+You may follow the rest of the instructions if you do not already have OpenCV installed on your computer.
   - While Anaconda installation takes care of most of the library requirements for CeMiA, there is only one more libary (OpenCV) that needs to be installed, which can be achieved through the command line. (You just need to copy and run the following command. (without the $))
     - Windows: Use Anaconda Prompt.
     - MacOS, Linux: Use Terminal.
@@ -29,9 +32,15 @@ $ pip install opencv-python==3.4.2.17
   - All the tools (Jupyter notebook files) in CeMiA package, depend on cemia55s.py to run. This module includes all the functions used in the develepment of these tools. This file should be in the same folder as the jupyter notebook you are running.
 
 ### Where to start your analysis?
-Once you have satistfied the requirements, you can start your analysis by downloading or cloning this repository on your computer.
+##### 1) Download the files on your computer
+Once you have satistfied the requirements, you can start your analysis by downloading or cloning this repository on your computer. The simplest way is to download the whole directory by pressing the green button (top right) and download the ZIP file.
+##### 2) Decide on the proper tool to use at each step
+The following Flow chart helps you to choose the best tool based on the data you have.
+![Flow Chart](https://raw.githubusercontent.com/Mitogenie/CeMiA/master/misc/Flowchart.png)
 
-### CeMiA Toolkit
+##### 3) Follow the step-by-step instructions in the tool you are using
+
+### What does each tool in CeMiA Toolkit do?
 
 #### Cell Catcher
 Cell Catcher is a tool designed to automatically detect, separate, and isolate individual cells from 2d multi-cell images. This tool uses the statistical distribution of mitochondria and nuclei across the image to separate individual cells from the images and export them as single-cell images.
@@ -105,7 +114,7 @@ Cell Catcher, and Mito Miner require RGB images of the cells, where nuclei are s
 ###### Development
 - 10+ images were used to develop and test Cell Catcher.
 
-#### Nomenclature of Features
+#### Nomenclature of Features (What does each measure feature mean?)
 ##### Mitochondria Level Measurements
 - These features have the following format: mito_<feature name> and are raw measurements.
     - Examples:
@@ -131,7 +140,7 @@ Cell Catcher, and Mito Miner require RGB images of the cells, where nuclei are s
 
 Details of all the features measured by MiA can be found here: [Features Dictionary.txt](https://github.com/Mitogenie/CeMiA/blob/master/Features%20Dictionary.txt)
 
-#### Tree Structure of the files and folders
+#### Tree Structure of the files and folders (where are the I/O of different apps?)
 
 ```sh
 your_project_folder/ (Name of you project folder)
@@ -168,10 +177,11 @@ your_project_folder/ (Name of you project folder)
   - Input: your_project_folder/
   - Output: your_project_folder/transformed
 
-#### Libraries used for development (A/Z)
+#### List of the libraries we used for development (A/Z)
 - copy
 - cv2
 - datetime
+- ipywidgets
 - math
 - matplotlib.pyplot
 - numpy
