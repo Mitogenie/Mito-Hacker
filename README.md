@@ -7,11 +7,17 @@
 ![Build Status](https://raw.githubusercontent.com/Mitogenie/misc/master/misc/CeMiA_ver.png)
 ##### CeMiA is a set of tools to enable high-throughput analysis of mitochondrial network morphology.
 
-  - ##### Cell Catcher
-  - ##### Mito Miner
-  - ##### MiA
-  - ##### Nuc Adder
+  - ### Cell Catcher
+    - Cell Catcher is a tool designed to automatically detect, separate, and isolate individual cells from 2d multi-cell images. This tool uses the statistical distribution of mitochondria and nuclei across the image to separate individual cells from the images and export them as single-cell images.
+  
+  - ### Mito Miner
+  
+  - ### MiA
+  
+  - ### Nuc Adder
 
+
+[Read more about these tools here](#cellular-mitochondrial-analyzer)
 
 ##### User Interface
 All the tools in CeMiA toolkit offer interactive, semi graphical user interface through Jupyter notebooks.
@@ -43,7 +49,6 @@ The following Flow chart helps you to choose the best tool based on the data you
 ### What does each tool in CeMiA Toolkit do?
 
 #### Cell Catcher
-Cell Catcher is a tool designed to automatically detect, separate, and isolate individual cells from 2d multi-cell images. This tool uses the statistical distribution of mitochondria and nuclei across the image to separate individual cells from the images and export them as single-cell images.
 
 ###### What to know before use
 - Input: Standard RGB Tiff images
