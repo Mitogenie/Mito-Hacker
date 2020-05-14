@@ -140,7 +140,7 @@ What does each measured feature mean?
 #### Cell Level Measurements
 There are two categories of cell Level measurements.
 
-##### Mitochondrial aggregate measurements
+#### Mitochondrial aggregate measurements
 - These are cell-level measurements that are aggregates of raw mitochondrial-level measurements.
     - cell_mean_mito_<feature>: Average of the feature among all the mitochondria in the cell.
         - Example:
@@ -153,7 +153,7 @@ There are two categories of cell Level measurements.
         - Example:
             - cell_std_mito_area: Standard deviation of the area among all the mitochondria in the cell.
 
-##### Cell level measurements based on mitochondria distribution
+#### Cell level measurements based on mitochondria distribution
 - These features have the following format: cell_<feature name> and are aggregate measurements.
     - Examples:
         - Fractal dimension of the mitochondrial network of the cell: cell_network_fractal_dimension
