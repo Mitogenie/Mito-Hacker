@@ -1,10 +1,10 @@
 # CeMiA
 
-[![N|Solid](https://raw.githubusercontent.com/Mitogenie/CeMiA/master/misc/KLab.png)](https://mic.med.virginia.edu/kashatus/)
+[![N|Solid](https://raw.githubusercontent.com/Mitogenie/misc/master/misc/KLab.png)](https://mic.med.virginia.edu/kashatus/)
 
-### Cellular Mitochondrial Analyzer
+## Cellular Mitochondrial Analyzer
 
-![Build Status](https://raw.githubusercontent.com/Mitogenie/CeMiA/master/misc/ver.png)
+![Build Status](https://raw.githubusercontent.com/Mitogenie/misc/master/misc/CeMiA_ver.png)
 ##### CeMiA is a set of tools to enable high-throughput analysis of mitochondrial network morphology.
 
   - ##### Cell Catcher
@@ -36,7 +36,7 @@ $ pip install opencv-python==3.4.2.17
 Once you have satistfied the requirements, you can start your analysis by downloading or cloning this repository on your computer. The simplest way is to download the whole directory by pressing the green button (top right) and download the ZIP file.
 ##### 2) Decide on the proper tool to use at each step
 The following Flow chart helps you to choose the best tool based on the data you have.
-![Flow Chart](https://raw.githubusercontent.com/Mitogenie/CeMiA/master/misc/Flowchart.png)
+![Flow Chart](https://raw.githubusercontent.com/Mitogenie/misc/master/misc/CeMiA_flowchart.png)
 
 ##### 3) Follow the step-by-step instructions in the tool you are using
 
@@ -63,7 +63,7 @@ Cell Catcher is a tool designed to automatically detect, separate, and isolate i
 - 500+ images were used to develop and test Cell Catcher.
 
 #### Mito Miner
-Mito Miner is a tool to segment mitochondrial netwrok in the cells. It uses the statistical distribution of pixel intensities across the mitochondrial network to detect and remove background noise from the cell and segment the mitochondrial network. Additionally, this tool can further improve the accuracy of the mitochondrial network segmentation through an optional adaptive correction, which takes the variation in the efficiency of fluorescence staining across each cell into account to enhance mitochondrial segmentation.
+Mito Miner is a tool to segment mitochondrial network in the cells. It uses the statistical distribution of pixel intensities across the mitochondrial network to detect and remove background noise from the cell and segment the mitochondrial network. Additionally, this tool can further improve the accuracy of the mitochondrial network segmentation through an optional adaptive correction, which takes the variation in the efficiency of fluorescence staining across each cell into account to enhance mitochondrial segmentation.
 ###### What to know before use
 - Input: Standard RGB Tiff images
     - Single-cell fluorescence images
@@ -95,7 +95,7 @@ MiA uses the binarized mitochondrial network to perform greater than 100 mitocho
 - 4500+ images were used to develop and test MiA.
 
 #### Nuc Adder (Optional Tool)
-Cell Catcher, and Mito Miner require RGB images of the cells, where nuclei are stained with DAPI. They use nuceli boundary to estimate the background intensity in each cell. However, in some images, nuclei staining is not available. By using Nuc Adder, you can transfrom your images and adapt them for tools in CeMiA. Nuc Adder, simply adds a circle as a synthetic nuclei to gather mitochondrial background info from each cell.
+Cell Catcher, and Mito Miner require RGB images of the cells, where nuclei are stained with DAPI. They use nuclei boundaries to estimate the background intensity in each cell. However, in some images, nuclei staining is not available. By using Nuc Adder, you can transfrom your images and adapt them for tools in CeMiA. Nuc Adder simply adds a circle as a synthetic nucleus to gather mitochondrial background info from each cell.
 
 ###### What to know before use
 - Input: Standard RGB Tiff images
@@ -113,6 +113,7 @@ Cell Catcher, and Mito Miner require RGB images of the cells, where nuclei are s
 
 ###### Development
 - 10+ images were used to develop and test Cell Catcher.
+[Go back to the table of contents](#cellular-mitochondrial-analyzer)
 
 #### Nomenclature of Features (What does each measure feature mean?)
 ##### Mitochondria Level Measurements
