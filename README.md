@@ -19,7 +19,7 @@
   - ### Nuc Adder (Optional)
     - Cell Catcher, and Mito Miner require RGB images of the cells, where nuclei are stained with DAPI. They use nuclei boundaries to estimate the background intensity in each cell. However, in some images, nuclei staining is not available. By using Nuc Adder, you can transfrom your images and adapt them for tools in CeMiA. Nuc Adder simply adds a circle as a synthetic nucleus to gather mitochondrial background info from each cell.
 
-[Read more about these tools here](#what-does-each-tool-in-cemia-toolkit-do?)
+[Read more about these tools here](#what-does-each-tool-in-cemia-toolkit-do)
 
 ##### User Interface
 All the tools in CeMiA toolkit offer interactive, semi graphical user interface through Jupyter notebooks.
