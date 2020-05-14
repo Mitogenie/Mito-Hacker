@@ -458,8 +458,6 @@ def behind_the_moon_filter(img, thresh,thresh2, thresh3,bg_harshness=-0.5,sig_ha
                 counter = counter + 1
 
         pic_bw = deepcopy(canvas)
-        #plt.figure(figsize=(10,10))
-        #plt.imshow(canvas)
 
         adapt_factors = []
 
@@ -473,12 +471,10 @@ def behind_the_moon_filter(img, thresh,thresh2, thresh3,bg_harshness=-0.5,sig_ha
         if method == 1:
             # Let it go
             _,pic_bw = cv2.threshold(green, thresh3*int(bg), 255, cv2.THRESH_BINARY)
-            #print('\nThreshold Level: ',bg)
 
         elif method == 2:
             # Not one of us
             _,pic_bw = cv2.threshold(green, thresh3*int(sig1), 255, cv2.THRESH_BINARY)
-            #print('Threshold Level: ',sig1)
 
     # Removing unwanted noise from the output
     pic_bw = cv2.medianBlur(pic_bw,3)
@@ -494,7 +490,7 @@ def behind_the_moon_filter(img, thresh,thresh2, thresh3,bg_harshness=-0.5,sig_ha
     normalizer = dist_rv.pdf(dist_mean)
 
     for point in list_points:
-        if (dist_rv.pdf(point)/normalizer) > 0.1:
+        if (dist_rv.pdf(point)/normalizer) > 0.01:
             updated_list_points.append(point)
 
     output = np.zeros(pic_bw.shape, dtype="uint8")
@@ -503,6 +499,7 @@ def behind_the_moon_filter(img, thresh,thresh2, thresh3,bg_harshness=-0.5,sig_ha
             output[pixel[1],pixel[0]] = 255
 
     output_image = output
+    output_image = cv2.medianBlur(output_image, 5)
 
     original = deepcopy(img)
 
@@ -2075,7 +2072,7 @@ def mahalanobis(x=None, data=None, cov=None):
     x_minus_mu = x - np.mean(data)
     if not cov:
         cov = np.cov(data.values.T)
-    inv_covmat = sp.linalg.inv(cov)
+    inv_covmat = np.linalg.inv(cov)
     left_term = np.dot(x_minus_mu, inv_covmat)
     mahal = np.dot(left_term, x_minus_mu.T)
     return mahal.diagonal()
