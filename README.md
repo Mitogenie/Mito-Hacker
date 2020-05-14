@@ -5,24 +5,25 @@
 ## Cellular Mitochondrial Analyzer
 
 ![Build Status](https://raw.githubusercontent.com/Mitogenie/misc/master/misc/CeMiA_ver.png)
-##### CeMiA is a set of tools to enable high-throughput analysis of mitochondrial network morphology.
+#### CeMiA is a set of tools to enable high-throughput analysis of mitochondrial network morphology.
 
   - ### Cell Catcher
     - Cell Catcher is a tool designed to automatically detect, separate, and isolate individual cells from 2d multi-cell images. This tool uses the statistical distribution of mitochondria and nuclei across the image to separate individual cells from the images and export them as single-cell images.
   
   - ### Mito Miner
+    - Mito Miner is a tool to segment mitochondrial network in the cells. It uses the statistical distribution of pixel intensities across the mitochondrial network to detect and remove background noise from the cell and segment the mitochondrial network. Additionally, this tool can further improve the accuracy of the mitochondrial network segmentation through an optional adaptive correction, which takes the variation in the efficiency of fluorescence staining across each cell into account to enhance mitochondrial segmentation.
   
   - ### MiA
+    - MiA uses the binarized mitochondrial network to perform greater than 100 mitochondria-level and cell-level morphometric measurements.
   
-  - ### Nuc Adder
+  - ### Nuc Adder (Optional)
+    - Cell Catcher, and Mito Miner require RGB images of the cells, where nuclei are stained with DAPI. They use nuclei boundaries to estimate the background intensity in each cell. However, in some images, nuclei staining is not available. By using Nuc Adder, you can transfrom your images and adapt them for tools in CeMiA. Nuc Adder simply adds a circle as a synthetic nucleus to gather mitochondrial background info from each cell.
 
-
-[Read more about these tools here](#cellular-mitochondrial-analyzer)
+[Read more about these tools here](#what-does-each-tool-in-cemia-toolkit-do?)
 
 ##### User Interface
 All the tools in CeMiA toolkit offer interactive, semi graphical user interface through Jupyter notebooks.
-##### Processing
-In the current version, all the tools analyze one cell at a time using the CPU. Currently we have a beta version of Cell Catcher and Mito Miner that benefit from Multi-Threading, where applicable, to enhance the performance. Once they are fully tested, we will release them in this repository.
+
 ##### Software Requirements
 Follow these instructions if you do not have Anaconda or Jupyter notebooks installed on your computer.
 </br>
@@ -36,6 +37,8 @@ $ pip install opencv-python==3.4.2.17
 ```
   - It is important to install this specific version of OpenCV for compatibility.
   - All the tools (Jupyter notebook files) in CeMiA package, depend on cemia55s.py to run. This module includes all the functions used in the develepment of these tools. This file should be in the same folder as the jupyter notebook you are running.
+  
+[Go back to the top](#cellular-mitochondrial-analyzer)
 
 ### Where to start your analysis?
 ##### 1) Download the files on your computer
@@ -45,6 +48,8 @@ The following Flow chart helps you to choose the best tool based on the data you
 ![Flow Chart](https://raw.githubusercontent.com/Mitogenie/misc/master/misc/CeMiA_flowchart.png)
 
 ##### 3) Follow the step-by-step instructions in the tool you are using
+
+[Go back to the top](#cellular-mitochondrial-analyzer)
 
 ### What does each tool in CeMiA Toolkit do?
 
@@ -68,7 +73,7 @@ The following Flow chart helps you to choose the best tool based on the data you
 - 500+ images were used to develop and test Cell Catcher.
 
 #### Mito Miner
-Mito Miner is a tool to segment mitochondrial network in the cells. It uses the statistical distribution of pixel intensities across the mitochondrial network to detect and remove background noise from the cell and segment the mitochondrial network. Additionally, this tool can further improve the accuracy of the mitochondrial network segmentation through an optional adaptive correction, which takes the variation in the efficiency of fluorescence staining across each cell into account to enhance mitochondrial segmentation.
+
 ###### What to know before use
 - Input: Standard RGB Tiff images
     - Single-cell fluorescence images
@@ -85,7 +90,7 @@ Mito Miner is a tool to segment mitochondrial network in the cells. It uses the 
 - 7500+ images were used to develop and test Mito Miner.
 
 #### MiA (Mitochondrial Analyzer)
-MiA uses the binarized mitochondrial network to perform greater than 100 mitochondria-level and cell-level morphometric measurements.
+
 ###### What to know before use
 - Input: Single-cell binary images of mitochondrial network
 - Output: Tabular data (TSV format), including aggregate(per cell, and per mitochondrion where applicable) and raw (per mitochondrion) measurements.
@@ -100,7 +105,6 @@ MiA uses the binarized mitochondrial network to perform greater than 100 mitocho
 - 4500+ images were used to develop and test MiA.
 
 #### Nuc Adder (Optional Tool)
-Cell Catcher, and Mito Miner require RGB images of the cells, where nuclei are stained with DAPI. They use nuclei boundaries to estimate the background intensity in each cell. However, in some images, nuclei staining is not available. By using Nuc Adder, you can transfrom your images and adapt them for tools in CeMiA. Nuc Adder simply adds a circle as a synthetic nucleus to gather mitochondrial background info from each cell.
 
 ###### What to know before use
 - Input: Standard RGB Tiff images
@@ -118,14 +122,23 @@ Cell Catcher, and Mito Miner require RGB images of the cells, where nuclei are s
 
 ###### Development
 - 10+ images were used to develop and test Cell Catcher.
-[Go back to the table of contents](#cellular-mitochondrial-analyzer)
 
-#### Nomenclature of Features (What does each measure feature mean?)
-##### Mitochondria Level Measurements
+##### Processing
+In the current version, all the tools analyze one cell at a time using the CPU. Currently we have a beta version of Cell Catcher and Mito Miner that benefit from Multi-Threading, where applicable, to enhance the performance. Once they are fully tested, we will release them in this repository.
+
+[Go back to the top](#cellular-mitochondrial-analyzer)
+
+### Nomenclature of Features
+
+What does each measured feature mean?
+
+#### Mitochondria Level Measurements
 - These features have the following format: mito_<feature name> and are raw measurements.
     - Examples:
         - area of individual mitochondrion in the cell: mito_area
+
 ##### Cell Level Measurements
+
 ###### Mitochondrial aggregate measurements
 - These are cell-level measurements that are aggregates of raw mitochondrial-level measurements.
     - cell_mean_mito_<feature>: Average of the feature among all the mitochondria in the cell.
@@ -146,7 +159,9 @@ Cell Catcher, and Mito Miner require RGB images of the cells, where nuclei are s
 
 Details of all the features measured by MiA can be found here: [Features Dictionary.txt](https://github.com/Mitogenie/CeMiA/blob/master/Features%20Dictionary.txt)
 
-#### Tree Structure of the files and folders (where are the I/O of different apps?)
+[Go back to the top](#cellular-mitochondrial-analyzer)
+
+### Tree Structure of the files and folders (where are the I/O of different apps?)
 
 ```sh
 your_project_folder/ (Name of you project folder)
@@ -169,7 +184,7 @@ your_project_folder/ (Name of you project folder)
 └── cell_catcher_temp/ (Can optionally be deleted after using Cell Catcher)
 ```
 
-##### Different Apps Input/Output Folders:
+#### Different Apps Input/Output Folders:
 - Cell Catcher:
   - Input: your_project_folder/
   - Output: your_project_folder/output/to_analyze
@@ -183,7 +198,9 @@ your_project_folder/ (Name of you project folder)
   - Input: your_project_folder/
   - Output: your_project_folder/transformed
 
-#### List of the libraries we used for development (A/Z)
+[Go back to the top](#cellular-mitochondrial-analyzer)
+
+### List of the libraries we used for development (A/Z)
 - copy
 - cv2
 - datetime
@@ -198,3 +215,4 @@ your_project_folder/ (Name of you project folder)
 - shutil
 - skimage
 
+[Go back to the top](#cellular-mitochondrial-analyzer)
