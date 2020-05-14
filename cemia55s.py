@@ -2054,7 +2054,7 @@ def measurement(address,cell_list,output_filename):
                 database = database.append(temp_dataset,ignore_index=True)
                 database_raw = database_raw.append(temp_dataset_raw,ignore_index=True)
             except:
-                print('Couldn\'t Analize {0}'.format(file))
+                print('Couldn\'t Analyze {0}'.format(file))
 
     detail = str(datetime.datetime.now().year) + '-' + str(datetime.datetime.now().month) + '-' + str(datetime.datetime.now().day) + '-' + output_filename
     database.drop(database.index[0],inplace=True)
@@ -2087,7 +2087,7 @@ def check_dir_requirements_miner(address):
 #Check if files exist where they should exist
 def check_requirements_miner(plan,address):
     counter = 0
-    if plan == 'I am using Mito Tracker to segment the cells that I previously isolated by Cell Catcher.':
+    if plan == 'I am using Mito Miner to segment the cells that I previously isolated by Cell Catcher.':
         try:
             temp_address = os.path.join(address, 'output','to_analyze')
             print(f'Your Plan:\n"{plan}"')
@@ -2165,7 +2165,7 @@ def confirm_requirements_miner(plan, address, counter):
             print(f"\nMake sure your desired files are located here: {os.path.join(address, 'output','to_analyze')}")
             print('\nOnce you put your files in the above location, run this cell again to ensure you are all set!')
 
-    if plan == 'I am using Mito Tracker to segment the cells that I previously isolated by Cell Catcher.':
+    if plan == 'I am using Mito Miner to segment the cells that I previously isolated by Cell Catcher.':
         try:
             file_list = []
             file_list = os.listdir(os.path.join(address, 'output','to_analyze'))
