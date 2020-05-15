@@ -24,6 +24,7 @@ from scipy.stats import multivariate_normal
 from scipy import ndimage
 from scipy import stats
 import shutil
+import re
 
 
 if __name__ == '__main__':
@@ -489,6 +490,7 @@ def behind_the_moon_filter(img, thresh,thresh2, thresh3,bg_harshness=-0.5,sig_ha
     dist_rv = multivariate_normal(dist_mean,dist_cov)
     normalizer = dist_rv.pdf(dist_mean)
 
+    #Minmum acceptable probability of mitochondria belonging to the  cell
     for point in list_points:
         if (dist_rv.pdf(point)/normalizer) > 0.01:
             updated_list_points.append(point)
@@ -499,7 +501,10 @@ def behind_the_moon_filter(img, thresh,thresh2, thresh3,bg_harshness=-0.5,sig_ha
             output[pixel[1],pixel[0]] = 255
 
     output_image = output
-    output_image = cv2.medianBlur(output_image, 5)
+
+    kernel_output = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5,5))
+    output_image = cv2.morphologyEx(output_image, cv2.MORPH_OPEN, kernel_output)
+    # output_image = cv2.medianBlur(output_image, 5)
 
     original = deepcopy(img)
 
@@ -539,9 +544,7 @@ def behind_the_moon_filter(img, thresh,thresh2, thresh3,bg_harshness=-0.5,sig_ha
 
                 labelMask = np.zeros(blue_bw.shape, dtype="uint8")
                 labelMask[labelsp == blob_label[r]] = 255
-                #plt.figure()
-                #plt.imshow(labelMask)
-                #plt.show()
+
                 blob = cv2.add(blob,labelMask)
 
         blob = 255 - blob
@@ -667,7 +670,6 @@ def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_
     #print('\nSampled threshold for empty cell removal: ',sig)
 
     # Detecting and removing deserted cells
-
     labels = measure.label(nuclear_mask, neighbors=8, background=0)
 
     mask = np.zeros(nuclear_mask.shape, dtype="uint8")
@@ -691,15 +693,10 @@ def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_
 
         if np.sum(local_mito_channel) >= empty_cell_thresh: #250000
             mask_blue = cv2.add(mask_blue, labelMask)
-    #print('cnt',cnt)
+
     kernel_nuc_erode = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5,5))
     mask_blue = cv2.erode(mask_blue,kernel_nuc_erode)
 
-    #EXTRA
-
-    #plt.figure(figsize=(10,10))
-    #plt.imshow(mask_blue)
-    #plt.title('MASK BLUE')
 
     # Remove empty cells from the image
     if correct == True:
@@ -1043,6 +1040,8 @@ def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_
 
             quality_tags = dict()
 
+            #Discarding cells where nucleus is touching the image frame
+
             for key in list_dict_nuc.keys():
 
                 x = np.array(list(map(lambda x: x[0],list_dict_nuc[key])))
@@ -1050,9 +1049,12 @@ def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_
 
                 quality_tags[key] = 'Good'
 
-            #     if ((len(x[x<4]) + len(y[y<4]) + len(x[x>1020]) + len(y[y>1020])) > 8):
+                if ((len(x[x<2]) + len(y[y<2]) + len(x[x>1022]) + len(y[y>1022])) > 16):
 
-            #         quality_tags[key] = 'Bad'
+                    quality_tags[key] = 'Bad'
+                    print(f'QC Failed: Cell {key}, (moved to "to_discard" directory)')
+                    print('Failures code: ', len(x[x<2]) + len(y[y<2]) + len(x[x>1022]) + len(y[y>1022]))
+
 
             #     else:
 
@@ -1092,7 +1094,7 @@ def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_
                 for point in list_points:
 
                     #Outlier Removal
-                    if (dist_rv.pdf(point)/normalizer) > 0.05:
+                    if (dist_rv.pdf(point)/normalizer) > 0.01:
                         updated_list_points.append(point)
 
                 output = np.zeros(cellBinaryMask.shape, dtype="uint8")
@@ -1247,21 +1249,22 @@ def single_cell_QC(abspath, full_path_to_image ,entangled,hide=True):
         if entangled:
             touch_thresh = 50
         else:
-            touch_thresh = 200
+            touch_thresh = 150
 
-        if ((mito_sum < 50000) or (len(c3[c3!=0]) > 2) or (touch_count > touch_thresh)):
+        if ((mito_sum < 50000) or (touch_count > touch_thresh)):
             shutil.move(full_path_to_image, os.path.join(abspath,'to_discard', os.path.split(full_path_to_image)[1]))
             print(f'QC Failed: {full_path_to_image}')
 
-            if (len(c3[c3!=0]) > 5) or (touch_count > touch_thresh):
-                print('Reason: The cell is touching the image frame.', len(c3[c3!=0]),touch_count)
+            if (touch_count > touch_thresh): #(len(c3[c3!=0]) > 5) or
+                print('Reason: To many mitochondria are touching the image frame.', touch_count)
 
             else:
-                print('Reason: Not enough mitochondrial content in the cell.')
-            print(f'{full_path_to_image} discarded. (moved to "to_discard" direcoty)\n')
+                print('Reason: Not enough mitochondrial content in the cell.', mito_sum)
+            print(f'{full_path_to_image} discarded. (moved to "to_discard" directory)\n')
 
         else:
             print(f'QC Passed: {full_path_to_image}')
+            print('Sucess code: ', mito_sum,touch_count)
 
             if hide == False:
                 plt.figure(figsize=(10,10))
@@ -1307,92 +1310,6 @@ def improve_mito(img2):
     img2 = img2 * 1 - 1 * np.min(img2)#img2[:,:,0] * 2 - 2 * np.min(img2[:,:,0])
 
     return ch,img2
-
-
-
-
-
-# # Garbage Collector and QC control for Cell Catcher export.
-# def single_cell_QC(abspath, hide=True):
-
-#     # Creating Junkyard
-#     try:
-#         os.makedirs(os.path.join(abspath,'to_discard'))
-#     except:
-#         pass
-
-#     files_to_check = os.listdir(os.path.join(abspath, 'to_analyze'))
-
-#     for fullpath_input in files_to_check:
-#         print(os.path.join(abspath, 'to_analyze',fullpath_input))
-#         try:
-
-#             # Read image
-#             image = cv2.imread(os.path.join(abspath, 'to_analyze',fullpath_input))
-
-#             # Detecting Mitochondria Channel
-#             red = image[:,:,1]
-#             rd_sm = np.sum(red)
-
-#             mito_channel = image[:,:,2]
-#             gr_sm = np.sum(mito_channel)
-
-#             if rd_sm > gr_sm:
-#                 mito_channel = red.copy()
-
-#             # Identifying aliens
-#             _,t2t = cv2.threshold(mito_channel, 0.01*np.max(mito_channel), 255, cv2.THRESH_BINARY)
-
-#             mitoLabels = measure.label(t2t, connectivity=2)
-#             propMito = regionprops(mitoLabels)
-#             good_mask = np.zeros(t2t.shape, dtype="uint8")
-
-#             #Size based filtering
-#             area_list = []
-#             for r in range(len(propMito)):
-#                 area_list.append(propMito[r].area)
-
-#             for r in range(len(propMito)):
-#                 if (propMito[r].area > 0.005 * np.max(area_list)) and (propMito[r].area < np.max(area_list)):
-#                     if propMito[r].label == 0:
-#                         continue
-#                     else:
-#                         globalMask = np.zeros(t2t.shape, dtype="uint8")
-#                         globalMask[mitoLabels == propMito[r].label] = 255
-#                         good_mask = cv2.add(good_mask,globalMask)
-
-#             good_mask = cv2.medianBlur(good_mask, 3)
-#             good_mask = 255 - good_mask
-
-#             image[:,:,1] = cv2.bitwise_and(image[:,:,1],good_mask)
-#             image[:,:,2] = cv2.bitwise_and(image[:,:,2],good_mask)
-
-#             #Identifying and discarding cells that are touching image edges or missing mitochondria
-
-#             qc_mask = np.zeros(t2t.shape, dtype="uint8")
-#             qc_mask[4:1020,4:1020] = 255
-#             qc_mask = 255 - qc_mask
-
-#             edge_sum = np.sum(cv2.bitwise_and(image[:,:,1],qc_mask)) + np.sum(cv2.bitwise_and(image[:,:,2],qc_mask))
-#             mito_sum = np.sum(image[:,:,1]) + np.sum(image[:,:,2])
-
-#             if (mito_sum < 10000) or (edge_sum) > 8:
-#                 shutil.move(fullpath_input, os.path.join(abspath,'to_discard', os.path.split(fullpath_input)[1]))
-#                 print(f'Did not pass QC: {fullpath_input}')
-#                 print(f'{fullpath_input} discarded. (check "to_discard" direcoty)')
-
-#             else:
-#                 print(f'QC Passed: {fullpath_input}')
-#                 cv2.imwrite(os.path.join(abspath,'to_analyze', os.path.split(fullpath_input)[1]) , image ) #cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-#                 if hide == False:
-#                     plt.figure(figsize=(10,10))
-#                     plt.imshow(cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
-#                     plt.title(f'{fullpath_input}')
-#         except:
-#             # print(f'{fullpath_input} is not a valid image.')
-#             pass
-
-
 
 
 def eight_neighbors(x, y, image):
@@ -1600,19 +1517,25 @@ def measurement(address,cell_list,output_filename):
                              'mito_total_density','mito_average_density' ,'mito_median_density',
                              'mito_branch_count','mito_distance','mito_weighted_cent_x' ,'mito_weighted_cent_y',
                              'mito_weighted_distance','mito_form_factor' ,'mito_roundness'])
-
+    counter = 0
+    total_file_count = len(cell_list)
     for file in cell_list:
+
+        counter += 1
+
         if '_mask' in file:
 
             fullpath_input = file
             abspath = address
 
             try:
-                print(file)
+
                 img = cv2.imread(abspath+'/output/processed/single_cells_binary/'+file)
                 img = img[:,:,0]
-                print('Now quantifying:', file)
-                scale = int(file[file.rfind('_')+1:file.rfind('_mask')])/1024
+                print(f'[{counter}/{total_file_count}] Now quantifying >>>', file)
+                pattern = re.compile(r'_\d{3,4}_mask.')
+                scale_search = pattern.findall(file)[0]
+                scale = int(scale_search[scale_search.find('_')+1:scale_search.rfind('_')])/1024
 
                 #Mitochondria level measurements
 
@@ -2055,7 +1978,7 @@ def measurement(address,cell_list,output_filename):
                 database_raw = database_raw.append(temp_dataset_raw,ignore_index=True)
             except:
                 print('Couldn\'t Analyze {0}'.format(file))
-
+        print(f'Finished quantifying {file} >>> Moving to the next file.')
     detail = str(datetime.datetime.now().year) + '-' + str(datetime.datetime.now().month) + '-' + str(datetime.datetime.now().day) + '-' + output_filename
     database.drop(database.index[0],inplace=True)
     database.to_csv(address+'/'+detail+'.csv', sep=',')
