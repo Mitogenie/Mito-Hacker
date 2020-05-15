@@ -1053,7 +1053,7 @@ def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_
 
                     quality_tags[key] = 'Bad'
                     print(f'QC Failed: Cell {key}, (moved to "to_discard" directory)')
-                    print('Failures code: ', len(x[x<2]) + len(y[y<2]) + len(x[x>1022]) + len(y[y>1022]))
+                    print('Failure code: ', len(x[x<2]) + len(y[y<2]) + len(x[x>1022]) + len(y[y>1022]))
 
 
             #     else:
@@ -1978,7 +1978,6 @@ def measurement(address,cell_list,output_filename):
                 database_raw = database_raw.append(temp_dataset_raw,ignore_index=True)
             except:
                 print('Couldn\'t Analyze {0}'.format(file))
-        print(f'Finished quantifying {file} >>> Moving to the next file.')
     detail = str(datetime.datetime.now().year) + '-' + str(datetime.datetime.now().month) + '-' + str(datetime.datetime.now().day) + '-' + output_filename
     database.drop(database.index[0],inplace=True)
     database.to_csv(address+'/'+detail+'.csv', sep=',')
