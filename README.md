@@ -17,7 +17,7 @@
     - MiA uses the binarized mitochondrial network to perform greater than 100 mitochondria-level and cell-level morphometric measurements.
   
   - ### Nuc Adder (Optional)
-    - Cell Catcher, and Mito Miner require RGB images of the cells, where nuclei are stained with DAPI. They use nuclei boundaries to estimate the background intensity in each cell. However, in some images, nuclei staining is not available. By using Nuc Adder, you can transfrom your images and adapt them for tools in CeMiA. Nuc Adder simply adds a circle as a synthetic nucleus to gather mitochondrial background info from each cell.
+    - Cell Catcher, and Mito Miner require RGB images of the cells, where nuclei are stained with DAPI (or any blue fluorescent dye). They use nuclei boundaries to estimate the background intensity in each cell. However, in some images, nuclei staining is not available. By using Nuc Adder, you can transfrom your images and adapt them for tools in CeMiA. Nuc Adder simply adds a circle as a synthetic nucleus to gather mitochondrial background info from each cell.
 
 [Read more about these tools here](#more-on-cemia-tools)
 
@@ -59,7 +59,7 @@ The following Flow chart helps you to choose the best tool based on the data you
 - Input: Standard RGB Tiff images
     - Multi-cell fluorescence images
         - Number of stains: 2
-            - Nuclei should be stained with DAPI
+            - Nuclei should be stained with DAPI (any blue fluorescent dye)
 - Output: Single-cell fluorescence images (Standard RGB Tiff)
     - Output images can used as input for Mito Miner to extract their mitochondrial network, or they can be independently used to train the desired ML or NN models where appropriate.
 
@@ -78,7 +78,7 @@ The following Flow chart helps you to choose the best tool based on the data you
 - Input: Standard RGB Tiff images
     - Single-cell fluorescence images
         - Number of stains: 2
-            - Nuclei should be stained with DAPI
+            - Nuclei should be stained with DAPI (or other blue fluorescent dye)
 - Output: Single-cell binary images of mitochondrial network
     - Output images can used as input for MiA to quantify their mitochondrial network, or they can be independently used to train the desired ML or NN models where appropriate.
 ###### Instructions:
@@ -93,7 +93,7 @@ The following Flow chart helps you to choose the best tool based on the data you
 
 ###### What to know before use
 - Input: Single-cell binary images of mitochondrial network
-- Output: Tabular data (TSV format), including aggregate(per cell, and per mitochondrion where applicable) and raw (per mitochondrion) measurements.
+- Output: Tabular data (TSV format), including aggregate (per cell, and per mitochondrion where applicable) and raw (per mitochondrion) measurements.
     - Why raw data along with aggregate measurements?
         - Flexibility! By providing raw data, users can limit or aggregate their data using their own criteria on each mitochondrial, or sub mitochondrial measurements, which can provide additional insight based on their specific applications.
 ###### Instructions:
