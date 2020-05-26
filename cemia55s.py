@@ -850,7 +850,7 @@ def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_
             # Keep track of nuclei points
                 list_dict_nuc[nucProperties[nn].label] = list(zip(np.nonzero(nucMask)[1],np.nonzero(nucMask)[0]))
                 list_dict_nuc2[nucProperties[nn].label] = list(zip(np.nonzero(nucMask2)[1],np.nonzero(nucMask2)[0]))
-
+                list_dict_nuc_base = deepcopy(list_dict_nuc2)
             #Keep track of mitochondrial points
 
             for mm in range(len(mitoProperties)):
@@ -1042,10 +1042,10 @@ def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_
 
             #Discarding cells where nucleus is touching the image frame
 
-            for key in list_dict_nuc.keys():
+            for key in list_dict_nuc_base.keys():
 
-                x = np.array(list(map(lambda x: x[0],list_dict_nuc[key])))
-                y = np.array(list(map(lambda x: x[1],list_dict_nuc[key])))
+                x = np.array(list(map(lambda x: x[0],list_dict_nuc_base[key])))
+                y = np.array(list(map(lambda x: x[1],list_dict_nuc_base[key])))
 
                 quality_tags[key] = 'Good'
 
@@ -1222,16 +1222,24 @@ def single_cell_QC(abspath, full_path_to_image ,entangled,hide=True):
         good_mask_sc = cv2.medianBlur(good_mask_sc, 3)
         good_mask_sc = 255 - good_mask_sc
 
+        image_sc[:,:,0] = cv2.bitwise_and(image_sc[:,:,0],good_mask_sc)
         image_sc[:,:,1] = cv2.bitwise_and(image_sc[:,:,1],good_mask_sc)
         image_sc[:,:,2] = cv2.bitwise_and(image_sc[:,:,2],good_mask_sc)
 
         #Identifying and discarding cells that are touching image edges or missing mitochondria
         #Finding cell boundary
-        xmx = np.max([np.max(np.where(image_sc[:,:,2].any(axis=1))[0]),np.max(np.where(image_sc[:,:,1].any(axis=1))[0])])
-        xmn = np.min([np.min(np.where(image_sc[:,:,2].any(axis=1))[0]),np.min(np.where(image_sc[:,:,1].any(axis=1))[0])])
+        try:
+            xmx = np.max([np.max(np.where(image_sc[:,:,2].any(axis=1))[0]),np.max(np.where(image_sc[:,:,1].any(axis=1))[0])])
+            xmn = np.min([np.min(np.where(image_sc[:,:,2].any(axis=1))[0]),np.min(np.where(image_sc[:,:,1].any(axis=1))[0])])
 
-        ymx = np.max([np.max(np.where(image_sc[:,:,2].any(axis=0))[0]),np.max(np.where(image_sc[:,:,1].any(axis=0))[0])])
-        ymn = np.min([np.min(np.where(image_sc[:,:,2].any(axis=0))[0]),np.min(np.where(image_sc[:,:,1].any(axis=0))[0])])
+            ymx = np.max([np.max(np.where(image_sc[:,:,2].any(axis=0))[0]),np.max(np.where(image_sc[:,:,1].any(axis=0))[0])])
+            ymn = np.min([np.min(np.where(image_sc[:,:,2].any(axis=0))[0]),np.min(np.where(image_sc[:,:,1].any(axis=0))[0])])
+        except:
+            xmx = np.max([np.max(np.where(image_sc[:,:,2].any(axis=1))[0]),np.max(np.where(image_sc[:,:,0].any(axis=1))[0])])
+            xmn = np.min([np.min(np.where(image_sc[:,:,2].any(axis=1))[0]),np.min(np.where(image_sc[:,:,0].any(axis=1))[0])])
+
+            ymx = np.max([np.max(np.where(image_sc[:,:,2].any(axis=0))[0]),np.max(np.where(image_sc[:,:,0].any(axis=0))[0])])
+            ymn = np.min([np.min(np.where(image_sc[:,:,2].any(axis=0))[0]),np.min(np.where(image_sc[:,:,0].any(axis=0))[0])])
 
         qc_mask = np.zeros(t2t_sc.shape, dtype="uint8")
         qc_mask[xmx:,:] = 255
