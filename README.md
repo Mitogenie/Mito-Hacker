@@ -9,15 +9,15 @@
 
   - ### Cell Catcher
     - Cell Catcher is a tool designed to automatically detect, separate, and isolate individual cells from 2d multi-cell images. This tool uses the statistical distribution of mitochondria and nuclei across the image to separate individual cells from the images and export them as single-cell images.
-  
+
   - ### Mito Miner
     - Mito Miner is a tool to segment mitochondrial network in the cells. It uses the statistical distribution of pixel intensities across the mitochondrial network to detect and remove background noise from the cell and segment the mitochondrial network. Additionally, this tool can further improve the accuracy of the mitochondrial network segmentation through an optional adaptive correction, which takes the variation in the efficiency of fluorescence staining across each cell into account to enhance mitochondrial segmentation.
-  
+
   - ### MiA
     - MiA uses the binarized mitochondrial network to perform greater than 100 mitochondria-level and cell-level morphometric measurements.
-  
+
   - ### Nuc Adder (Optional)
-    - Cell Catcher, and Mito Miner require RGB images of the cells, where nuclei are stained with DAPI (or any blue fluorescent dye). They use nuclei boundaries to estimate the background intensity in each cell. However, in some images, nuclei staining is not available. By using Nuc Adder, you can transfrom your images and adapt them for tools in CeMiA. Nuc Adder simply adds a circle as a synthetic nucleus to gather mitochondrial background info from each cell.
+    - Cell Catcher, and Mito Miner require 2d RGB images of the cells, where nuclei are stained with DAPI (or any blue fluorescent dye). They use nuclei boundaries to estimate the background intensity in each cell. However, in some images, nuclei staining is not available. By using Nuc Adder, you can transfrom your images and adapt them for tools in CeMiA. Nuc Adder simply adds a circle as a synthetic nucleus to gather mitochondrial background info from each cell.
 
 [Read more about these tools here](#more-on-cemia-tools)
 
@@ -37,7 +37,7 @@ $ pip install opencv-python==3.4.2.17
 ```
   - It is important to install this specific version of OpenCV for compatibility.
   - All the tools (Jupyter notebook files) in CeMiA package, depend on cemia55s.py to run. This module includes all the functions used in the develepment of these tools. This file should be in the same folder as the jupyter notebook you are running.
-  
+
 [Go back to the top](#cellular-mitochondrial-analyzer)
 
 ### Where to start your analysis?
@@ -56,11 +56,11 @@ The following Flow chart helps you to choose the best tool based on the data you
 #### Cell Catcher
 
 ###### What to know before use
-- Input: Standard RGB Tiff images
+- Input: Standard 2d RGB Tiff images
     - Multi-cell fluorescence images
         - Number of stains: 2
             - Nuclei should be stained with DAPI (any blue fluorescent dye)
-- Output: Single-cell fluorescence images (Standard RGB Tiff)
+- Output: Single-cell fluorescence images (Standard 2d RGB Tiff)
     - Output images can used as input for Mito Miner to extract their mitochondrial network, or they can be independently used to train the desired ML or NN models where appropriate.
 
 ###### Instructions
@@ -75,7 +75,7 @@ The following Flow chart helps you to choose the best tool based on the data you
 #### Mito Miner
 
 ###### What to know before use
-- Input: Standard RGB Tiff images
+- Input: Standard 2d RGB Tiff images
     - Single-cell fluorescence images
         - Number of stains: 2
             - Nuclei should be stained with DAPI (or other blue fluorescent dye)
@@ -107,11 +107,11 @@ The following Flow chart helps you to choose the best tool based on the data you
 #### Nuc Adder (Optional Tool)
 
 ###### What to know before use
-- Input: Standard RGB Tiff images
+- Input: Standard 2d RGB Tiff images
     - Single- or Multi-cell fluorescence images
         - Number of stains: 1
             - The stanied channel should be red or green.
-- Output: Multi- or Single-cell fluorescence images (Standard RGB Tiff)
+- Output: Multi- or Single-cell fluorescence images (Standard 2d RGB Tiff)
     - Output images with synthetic nuclei can used as input for Mito Miner or Cell Catcher.
 
 ###### Instructions
