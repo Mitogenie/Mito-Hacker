@@ -158,7 +158,7 @@ There are two categories of cell Level measurements.
     - Examples:
         - Fractal dimension of the mitochondrial network of the cell: cell_network_fractal_dimension
 
-Details of all the features measured by MiA can be found here: [Features Dictionary.txt](https://github.com/Mitogenie/CeMiA/blob/master/Features%20Dictionary.txt)
+Details of all the features measured by MiA can be found here: [Features Dictionary.txt](https://github.com/Mitogenie/misc/blob/master/misc/CeMiAFeaturesDictionary.txt)
 
 [Go back to the top](#cellular-mitochondrial-analyzer)
 
@@ -220,8 +220,7 @@ your_project_folder/ (Name of you project folder)
 
 ### A note on imaging
 
-Images should be acquired at a consistent pixel size and pixels should be unsaturated.  Zeiss image files (.lsm or .czi) optimize exposure time for each channel to acquire unsaturated pixels; no digital zoom; 
-Image bit depth of 8 or 16; while square images are preferred, there is no limit on size or aspect ratio of the images. The software standardizes all images to standard 1024 x 1024 for internal analysis; all the measurements are in pixels units, so when comparing data from images with different sizes. The user should be caustious about direct comparisons.
+Images should be acquired at a consistent pixel size. The software will convert all images to standard 1024 x 1024 dimensions for internal analysis, then adjust the measurements to reflect the conversion in original image size. All the measurements are in pixel units, the user can apply a scaling factor to their data based on their own pixel size to convert measurements to microns. The user should be cautious about direct comparisons of pixel data from images of different sizes. While square images are preferred, there is no limit on size or aspect ratio of the images.
 
 [Go back to the top](#cellular-mitochondrial-analyzer)
 
