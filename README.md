@@ -217,3 +217,11 @@ your_project_folder/ (Name of you project folder)
 - skimage
 
 [Go back to the top](#cellular-mitochondrial-analyzer)
+
+### A note on imaging
+
+Images should be acquired at a consistent pixel size and pixels should be unsaturated.  Zeiss image files (.lsm or .czi) optimize exposure time for each channel to acquire unsaturated pixels; no digital zoom; 
+Image bit depth of 8 or 16; while square images are preferred, there is no limit on size or aspect ratio of the images. The software standardizes all images to standard 1024 x 1024 for internal analysis; all the measurements are in pixels units, so when comparing data from images with different sizes. The user should be caustious about direct comparisons.
+
+[Go back to the top](#cellular-mitochondrial-analyzer)
+
