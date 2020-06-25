@@ -1510,11 +1510,11 @@ def measurement(address,cell_list,output_filename):
                              'cell_weighted_skewness_squared','cell_network_orientation','cell_network_major_axis',
                              'cell_network_minor_axis', 'cell_network_eccentricity',
                              'cell_network_effective_extent','cell_network_effective_solidity',
-                             'cell_network_fractal_dimension','scale'])
+                             'cell_network_fractal_dimension'])
 
 
 
-    database_raw = pd.DataFrame([[0]*39], columns = ['cell_name','scale','mito_area','mito_centroid','mito_eccentricity',
+    database_raw = pd.DataFrame([[0]*39], columns = ['cell_name','resize_factor','mito_area','mito_centroid','mito_eccentricity',
                              'mito_equi_diameter','mito_euler_number','mito_extent','mito_major_axis',
                              'mito_minor_axis','mito_orientation','mito_perimeter','mito_solidity',
                              'mito_centroid_x','mito_centroid_y','mito_distance','mito_weighted_cent_x',
@@ -1911,7 +1911,7 @@ def measurement(address,cell_list,output_filename):
                           cell_skewness_y, cell_weighted_skewness_y, cell_skewness_squared,
                           cell_weighted_skewness_squared, cell_network_orientation, cell_network_major_axis,
                           cell_network_minor_axis, cell_network_eccentricity, cell_network_effective_extent,
-                          cell_network_effective_solidity,cell_network_fractal_dimension, scale]],
+                          cell_network_effective_solidity,cell_network_fractal_dimension]],
                           columns = ['cell_name','cell_mito_count', 'cell_total_mito_area' ,'cell_mean_mito_area',
                          'cell_median_mito_area','cell_std_mito_area','cell_mean_mito_eccentricity',
                          'cell_median_mito_eccentricity','cell_std_mito_eccentricity',
@@ -1956,7 +1956,7 @@ def measurement(address,cell_list,output_filename):
                          'cell_weighted_skewness_squared','cell_network_orientation','cell_network_major_axis',
                          'cell_network_minor_axis', 'cell_network_eccentricity',
                          'cell_network_effective_extent','cell_network_effective_solidity',
-                         'cell_network_fractal_dimension','scale'])
+                         'cell_network_fractal_dimension'])
 
                 temp_dataset_raw = pd.DataFrame([[file,scale, mito_area, mito_centroid,
                           mito_eccentricity, mito_equi_diameter, mito_euler_number, mito_extent,
@@ -1969,7 +1969,7 @@ def measurement(address,cell_list,output_filename):
                           mito_total_density, mito_average_density,mito_median_density, mito_branch_count,
                           mito_distance, mito_weighted_cent_x, mito_weighted_cent_y, mito_weighted_distance,
                           mito_form_factor, mito_roundness]],
-                          columns = ['cell_name', 'scale','mito_area','mito_centroid','mito_eccentricity',
+                          columns = ['cell_name', 'resize_factor','mito_area','mito_centroid','mito_eccentricity',
                          'mito_equi_diameter','mito_euler_number','mito_extent','mito_major_axis',
                          'mito_minor_axis','mito_orientation','mito_perimeter','mito_solidity',
                          'mito_centroid_x','mito_centroid_y','mito_distance','mito_weighted_cent_x',
