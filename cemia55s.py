@@ -157,7 +157,7 @@ def shapeAdjust(img, size=(1024,1024), padColor=(0,0,0,255)):
         return scaled_img
 
 # Cleaning the nuclei
-def nucleus_filtering(fullpath_input, abspath, intensity_thresh,size_thresh,show_images, nuc_correction=True, diffused=False):
+def nucleus_filtering(fullpath_input, abspath, intensity_thresh,size_thresh,show_images, non_uniformity, nuc_correction=True, diffused=False):
 
     # Reading the image and extracting its size
     image = cv2.imread(fullpath_input)
@@ -176,7 +176,7 @@ def nucleus_filtering(fullpath_input, abspath, intensity_thresh,size_thresh,show
     # Cleaning nuclei channel
 
     # Apply tophat to remove uneven illumination and make it sharper
-    kernel_tophat = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (25,25))
+    kernel_tophat = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (non_uniformity,non_uniformity))
     image_cp0 = cv2.morphologyEx(image_cp0, cv2.MORPH_TOPHAT, kernel_tophat)
 
 
@@ -605,7 +605,7 @@ def mysig(height,harshness,compactness,value,shift,offset):
 
 
 # Cell Segmentation from multi-cell images
-def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_size,correct, nuc_intensity_threshold, nuc_size_threshold,empty_cell_thresh, hide, nuc_correct,diffused, mito_diffused, entangled):
+def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_size,correct, nuc_intensity_threshold, nuc_size_threshold,empty_cell_thresh, hide, nuc_correct,diffused, mito_diffused, entangled, non_uniformity):
 
     # Read and reshape image
     image = cv2.imread(fullpath_input)
@@ -653,7 +653,7 @@ def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_
     GR = deepcopy(mito_channel)
 
     # Apply nuclei mask from nuclei_filter
-    nuclear_mask = nucleus_filtering(fullpath_input, abspath, nuc_intensity_threshold, nuc_size_threshold,False,nuc_correct,diffused)
+    nuclear_mask = nucleus_filtering(fullpath_input, abspath, nuc_intensity_threshold, nuc_size_threshold,False, non_uniformity, nuc_correct,diffused)
 
     blue = cv2.bitwise_and(image_cp3[:,:,0],nuclear_mask)
     #blue = cv2.GaussianBlur(blue,(15,15),0)
@@ -2135,6 +2135,7 @@ catcher_initial_params = {
 'mito_threshold' : [65],
 'mito_low' : [False],
 'sparse' : [True],
+'non_uniformity' : [25],
 }
 
 mito_miner_initial_params = {
