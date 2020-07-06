@@ -1540,7 +1540,7 @@ def measurement(address,cell_list,output_filename):
 
                 img = cv2.imread(abspath+'/output/processed/single_cells_binary/'+file)
                 img = img[:,:,0]
-                print(f'[{100*(counter/total_file_count)}%] Now quantifying >>>', file)
+                print(f'[{np.round(100*(counter/total_file_count),2)}%] Now quantifying >>>', file)
                 pattern = re.compile(r'_\d{3,4}_mask.')
                 scale_search = pattern.findall(file)[0]
                 scale = int(scale_search[scale_search.find('_')+1:scale_search.rfind('_')])/1024
