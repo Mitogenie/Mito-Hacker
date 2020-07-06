@@ -1466,7 +1466,7 @@ def good_check(address):
 
 
 def measurement(address,cell_list,output_filename):
-    database = pd.DataFrame([[0]*110], columns = ['cell_name','cell_mito_count', 'cell_total_mito_area','cell_mean_mito_area',
+    database = pd.DataFrame([[0]*109], columns = ['cell_name','cell_mito_count', 'cell_total_mito_area','cell_mean_mito_area',
                              'cell_median_mito_area','cell_std_mito_area','cell_mean_mito_eccentricity',
                              'cell_median_mito_eccentricity','cell_std_mito_eccentricity',
                              'cell_mean_mito_equi_diameter','cell_median_mito_equi_diameter',
