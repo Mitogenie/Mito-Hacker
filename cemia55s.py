@@ -659,7 +659,7 @@ def auto_segmentation(fullpath_input, abspath, namestring,filt,showimg,dilation_
     #blue = cv2.GaussianBlur(blue,(15,15),0)
     # Use nuclei to measure the mitochodrial background level across the image (Multi cell)
 
-    _, blue_bw = cv2.threshold(blue, int(np.percentile(blue[blue>0],60)), 255, cv2.THRESH_BINARY)
+    _, blue_bw = cv2.threshold(blue, int(np.percentile(blue[blue>0],60)-1), 255, cv2.THRESH_BINARY)
     g_temp =cv2.bitwise_and(blue_bw,mito_channel)
 
     # Mitochondrial background signal estimation
