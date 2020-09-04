@@ -289,7 +289,11 @@ def behind_the_moon_filter(img, thresh,thresh2, thresh3,bg_harshness=-0.5,sig_ha
 
     # Defining the mask for sampling mitochondiral background in the nucleus area
 
-    (thresh_blue, blue_bw) = cv2.threshold(blue, np.percentile(blue[blue>0],thresh), 255, cv2.THRESH_BINARY)
+    th_lev = np.percentile(blue[blue>0], thresh)
+    if th_lev > 245:
+        th_lev = th_lev * 0.9
+
+    (thresh_blue, blue_bw) = cv2.threshold(blue, th_lev, 255, cv2.THRESH_BINARY)
     labels = measure.label(blue_bw, neighbors=8, background=0)
 
     # Use the largest mask to sample background (in case there is noise in nucleus channel)
