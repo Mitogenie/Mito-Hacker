@@ -121,7 +121,7 @@ The following Flow chart helps you to choose the best tool based on the data you
 - The Jupyter notebook file provides the users with step-by-step instructions to analyze their data.
 
 ###### Development
-- 10+ images were used to develop and test Cell Catcher.
+- 20+ images were used to develop and test Cell Catcher.
 
 ##### Processing
 In the current version, all the tools analyze one cell at a time using the CPU. Currently we have a beta version of Cell Catcher and Mito Miner that benefit from Multi-Threading, where applicable, to enhance the performance. Once they are fully tested, we will release them in this repository.
