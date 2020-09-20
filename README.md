@@ -2,7 +2,7 @@
 
 [![N|Solid](https://raw.githubusercontent.com/Mitogenie/misc/master/misc/KLab.png)](https://mic.med.virginia.edu/kashatus/)
 
-## Cellular Mitochondrial Analydid Toolbox
+## Cellular Mitochondrial Analysis Toolbox
 
 #### Mito Hacker is a set of tools to enable high-throughput analysis of mitochondrial network morphology.
 
