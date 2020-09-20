@@ -2,7 +2,7 @@
 
 [![N|Solid](https://raw.githubusercontent.com/Mitogenie/misc/master/misc/KLab.png)](https://mic.med.virginia.edu/kashatus/)
 
-## Cellular Mitochondrial Analyzer
+## Cellular Mitochondrial Analydid Toolbox
 
 ![Build Status](https://raw.githubusercontent.com/Mitogenie/misc/master/misc/CeMiA_ver.png)
 #### Mito Hacker is a set of tools to enable high-throughput analysis of mitochondrial network morphology.
@@ -13,7 +13,7 @@
   - ### Mito Catcher
     - Mito Catcher is a tool to segment mitochondrial network in the cells. It uses the statistical distribution of pixel intensities across the mitochondrial network to detect and remove background noise from the cell and segment the mitochondrial network. Additionally, this tool can further improve the accuracy of the mitochondrial network segmentation through an optional adaptive correction, which takes the variation in the efficiency of fluorescence staining across each cell into account to enhance mitochondrial segmentation.
 
-  - ### MiA
+  - ### MiA (Mitochondrial Analyzer)
     - MiA uses the binarized mitochondrial network to perform greater than 100 mitochondria-level and cell-level morphometric measurements.
 
   - ### Nuc Adder (Optional)
