@@ -4,7 +4,6 @@
 
 ## Cellular Mitochondrial Analydid Toolbox
 
-![Build Status](https://raw.githubusercontent.com/Mitogenie/misc/master/misc/CeMiA_ver.png)
 #### Mito Hacker is a set of tools to enable high-throughput analysis of mitochondrial network morphology.
 
   - ### Cell Catcher
