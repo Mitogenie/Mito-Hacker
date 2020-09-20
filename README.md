@@ -5,38 +5,38 @@
 ## Cellular Mitochondrial Analyzer
 
 ![Build Status](https://raw.githubusercontent.com/Mitogenie/misc/master/misc/CeMiA_ver.png)
-#### CeMiA is a set of tools to enable high-throughput analysis of mitochondrial network morphology.
+#### Mito Hacker is a set of tools to enable high-throughput analysis of mitochondrial network morphology.
 
   - ### Cell Catcher
     - Cell Catcher is a tool designed to automatically detect, separate, and isolate individual cells from 2d multi-cell images. This tool uses the statistical distribution of mitochondria and nuclei across the image to separate individual cells from the images and export them as single-cell images.
 
-  - ### Mito Miner
-    - Mito Miner is a tool to segment mitochondrial network in the cells. It uses the statistical distribution of pixel intensities across the mitochondrial network to detect and remove background noise from the cell and segment the mitochondrial network. Additionally, this tool can further improve the accuracy of the mitochondrial network segmentation through an optional adaptive correction, which takes the variation in the efficiency of fluorescence staining across each cell into account to enhance mitochondrial segmentation.
+  - ### Mito Catcher
+    - Mito Catcher is a tool to segment mitochondrial network in the cells. It uses the statistical distribution of pixel intensities across the mitochondrial network to detect and remove background noise from the cell and segment the mitochondrial network. Additionally, this tool can further improve the accuracy of the mitochondrial network segmentation through an optional adaptive correction, which takes the variation in the efficiency of fluorescence staining across each cell into account to enhance mitochondrial segmentation.
 
   - ### MiA
     - MiA uses the binarized mitochondrial network to perform greater than 100 mitochondria-level and cell-level morphometric measurements.
 
   - ### Nuc Adder (Optional)
-    - Cell Catcher, and Mito Miner require 2d RGB images of the cells, where nuclei are stained with DAPI (or any blue fluorescent dye). They use nuclei boundaries to estimate the background intensity in each cell. However, in some images, nuclei staining is not available. By using Nuc Adder, you can transfrom your images and adapt them for tools in CeMiA. Nuc Adder simply adds a circle as a synthetic nucleus to gather mitochondrial background info from each cell.
+    - Cell Catcher, and Mito Catcher require 2d RGB images of the cells, where nuclei are stained with DAPI (or any blue fluorescent dye). They use nuclei boundaries to estimate the background intensity in each cell. However, in some images, nuclei staining is not available. By using Nuc Adder, you can transfrom your images and adapt them for tools in Mito Hacker. Nuc Adder simply adds a circle as a synthetic nucleus to gather mitochondrial background info from each cell.
 
 [Read more about these tools here](#more-on-cemia-tools)
 
 ##### User Interface
-All the tools in CeMiA toolkit offer interactive, semi graphical user interface through Jupyter notebooks.
+All the tools in Mito Hacker toolkit offer interactive, semi graphical user interface through Jupyter notebooks.
 
 ##### Software Requirements
 Follow these instructions if you do not have Anaconda or Jupyter notebooks installed on your computer.
 </br>
-  - CeMiA toolkit is developed in Jupyter notebooks using Python 3. Since it benefits from a wide range of Python libraries, along with Jupyter notebooks, we suggest installing Anaconda distribution of Python (V 3.7). --> [Download Anaconda](https://www.anaconda.com/distribution/)
+  - Mito Hacker toolkit is developed in Jupyter notebooks using Python 3. Since it benefits from a wide range of Python libraries, along with Jupyter notebooks, we suggest installing Anaconda distribution of Python (V 3.7). --> [Download Anaconda](https://www.anaconda.com/distribution/)
 You may follow the rest of the instructions if you do not already have OpenCV installed on your computer.
-  - While Anaconda installation takes care of most of the library requirements for CeMiA, there is only one more libary (OpenCV) that needs to be installed, which can be achieved through the command line. (You just need to copy and run the following command. (without the $))
+  - While Anaconda installation takes care of most of the library requirements for Mito Hacker, there is only one more libary (OpenCV) that needs to be installed, which can be achieved through the command line. (You just need to copy and run the following command. (without the $))
     - Windows: Use Anaconda Prompt.
     - MacOS, Linux: Use Terminal.
 ```sh
 $ pip install opencv-python==3.4.2.17
 ```
   - It is important to install this specific version of OpenCV for compatibility.
-  - All the tools (Jupyter notebook files) in CeMiA package, depend on cemia55s.py to run. This module includes all the functions used in the develepment of these tools. This file should be in the same folder as the jupyter notebook you are running.
+  - All the tools (Jupyter notebook files) in Mito Hacker package, depend on cemia55s.py to run. This module includes all the functions used in the develepment of these tools. This file should be in the same folder as the jupyter notebook you are running.
 
 [Go back to the top](#cellular-mitochondrial-analyzer)
 
@@ -45,13 +45,13 @@ $ pip install opencv-python==3.4.2.17
 Once you have satistfied the requirements, you can start your analysis by downloading or cloning this repository on your computer. The simplest way is to download the whole directory by pressing the green button (top right) and download the ZIP file.
 ##### 2) Decide on the proper tool to use at each step
 The following Flow chart helps you to choose the best tool based on the data you have.
-![Flow Chart](https://raw.githubusercontent.com/Mitogenie/misc/master/misc/CeMiA_flowchart.png)
+![Flow Chart](https://raw.githubusercontent.com/Mitogenie/misc/master/misc/Mito Hacker_flowchart.png)
 
 ##### 3) Follow the step-by-step instructions in the tool you are using
 
 [Go back to the top](#cellular-mitochondrial-analyzer)
 
-### More on CeMiA Tools
+### More on Mito Hacker Tools
 
 #### Cell Catcher
 
@@ -61,7 +61,7 @@ The following Flow chart helps you to choose the best tool based on the data you
         - Number of stains: 2
             - Nuclei should be stained with DAPI (any blue fluorescent dye)
 - Output: Single-cell fluorescence images (Standard 2d RGB Tiff)
-    - Output images can used as input for Mito Miner to extract their mitochondrial network, or they can be independently used to train the desired ML or NN models where appropriate.
+    - Output images can used as input for Mito Catcher to extract their mitochondrial network, or they can be independently used to train the desired ML or NN models where appropriate.
 
 ###### Instructions
 - Run Cell_Catcher.ipynb using Jupyter notebook.
@@ -72,7 +72,7 @@ The following Flow chart helps you to choose the best tool based on the data you
 ###### Development
 - 500+ images were used to develop and test Cell Catcher.
 
-#### Mito Miner
+#### Mito Catcher
 
 ###### What to know before use
 - Input: Standard 2d RGB Tiff images
@@ -87,7 +87,7 @@ The following Flow chart helps you to choose the best tool based on the data you
         - Note: We are not affiliated with the owner of the above video. We just found this video on Jupyter notebooks very helpful, There are plenty of great tutorials about this subject, and you may use any source your prefer.
 - The Jupyter notebook file provides the users with step-by-step instructions to analyze their data.
 ###### Development
-- 7500+ images were used to develop and test Mito Miner.
+- 7500+ images were used to develop and test Mito Catcher.
 
 #### MiA (Mitochondrial Analyzer)
 
@@ -112,7 +112,7 @@ The following Flow chart helps you to choose the best tool based on the data you
         - Number of stains: 1
             - The stanied channel should be red or green.
 - Output: Multi- or Single-cell fluorescence images (Standard 2d RGB Tiff)
-    - Output images with synthetic nuclei can used as input for Mito Miner or Cell Catcher.
+    - Output images with synthetic nuclei can used as input for Mito Catcher or Cell Catcher.
 
 ###### Instructions
 - Run Nuc_Adder.ipynb using Jupyter notebook.
@@ -124,7 +124,7 @@ The following Flow chart helps you to choose the best tool based on the data you
 - 20+ images were used to develop and test Cell Catcher.
 
 ##### Processing
-In the current version, all the tools analyze one cell at a time using the CPU. Currently we have a beta version of Cell Catcher and Mito Miner that benefit from Multi-Threading, where applicable, to enhance the performance. Once they are fully tested, we will release them in this repository.
+In the current version, all the tools analyze one cell at a time using the CPU. Currently we have a beta version of Cell Catcher and Mito Catcher that benefit from Multi-Threading, where applicable, to enhance the performance. Once they are fully tested, we will release them in this repository.
 
 [Go back to the top](#cellular-mitochondrial-analyzer)
 
@@ -158,7 +158,7 @@ There are two categories of cell Level measurements.
     - Examples:
         - Fractal dimension of the mitochondrial network of the cell: cell_network_fractal_dimension
 
-Details of all the features measured by MiA can be found here: [Features Dictionary.txt](https://github.com/Mitogenie/misc/blob/master/misc/CeMiAFeaturesDictionary.txt)
+Details of all the features measured by MiA can be found here: [Features Dictionary.txt](https://github.com/Mitogenie/misc/blob/master/misc/Mito HackerFeaturesDictionary.txt)
 
 [Go back to the top](#cellular-mitochondrial-analyzer)
 
@@ -169,12 +169,12 @@ your_project_folder/ (Name of you project folder)
 ├── *.tif (Original images in the project)
 ├── output/
 │     ├── to_analyze/
-│     │          ├── *.tif  (Cell Catcher Output/Mito Miner input files)
+│     │          ├── *.tif  (Cell Catcher Output/Mito Catcher input files)
 │     ├── to_discard/
 │     │          ├── *.tif  (These files did not pass the initial quality check by Cell Catcher)
 │     └── processed/
 │                └── single_cells_binary/
-│                                 ├── *_binarized.tif (Mito Miner output/MiA input files)
+│                                 ├── *_binarized.tif (Mito Catcher output/MiA input files)
 │                                 └── *.tif  (Single cells isolated by Cell Catcher)
 │
 ├── transformed/
@@ -189,7 +189,7 @@ your_project_folder/ (Name of you project folder)
 - Cell Catcher:
   - Input: your_project_folder/
   - Output: your_project_folder/output/to_analyze
-- Mito Miner:
+- Mito Catcher:
   - Input: your_project_folder/output/to_analyze
   - Output: your_project_folder/output/processed/single_cells_binary/
 - MiA
