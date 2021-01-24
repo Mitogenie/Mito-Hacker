@@ -44,7 +44,7 @@ $ pip install opencv-python==3.4.2.17
 Once you have satistfied the requirements, you can start your analysis by downloading or cloning this repository on your computer. The simplest way is to download the whole directory by pressing the green button (top right) and download the ZIP file.
 ##### 2) Decide on the proper tool to use at each step
 The following Flow chart helps you to choose the best tool based on the data you have.
-![Flow Chart](https://raw.githubusercontent.com/Mitogenie/misc/master/misc/Mito Hacker_flowchart.png)
+![Flow Chart](https://raw.githubusercontent.com/Mitogenie/misc/master/misc/CeMiA_flowchart.png)
 
 ##### 3) Follow the step-by-step instructions in the tool you are using
 
