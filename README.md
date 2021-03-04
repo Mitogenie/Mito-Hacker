@@ -157,7 +157,7 @@ There are two categories of cell Level measurements.
     - Examples:
         - Fractal dimension of the mitochondrial network of the cell: cell_network_fractal_dimension
 
-Details of all the features measured by MiA can be found here: [Features Dictionary.txt](https://github.com/Mitogenie/misc/blob/master/misc/Mito HackerFeaturesDictionary.txt)
+Details of all the features measured by MiA can be found here: [CeMiAFeaturesDictionary.txt](https://github.com/Mitogenie/misc/blob/master/misc/CeMiAFeaturesDictionary.txt)
 
 [Go back to the top](#cellular-mitochondrial-analyzer)
 
