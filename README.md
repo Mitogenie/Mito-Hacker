@@ -32,7 +32,7 @@ You may follow the rest of the instructions if you do not already have OpenCV in
     - Windows: Use Anaconda Prompt.
     - MacOS, Linux: Use Terminal.
 ```sh
-$ pip install opencv-python==3.4.2.17
+$ pip install opencv-python==3.4.13.47
 ```
   - It is important to install this specific version of OpenCV for compatibility.
   - All the tools (Jupyter notebook files) in Mito Hacker package, depend on cemia55s.py to run. This module includes all the functions used in the develepment of these tools. This file should be in the same folder as the jupyter notebook you are running.
