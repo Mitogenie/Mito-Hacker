@@ -7,7 +7,7 @@
 [![N|Solid](https://raw.githubusercontent.com/Mitogenie/misc/master/misc/mglogo.jpg)](https://mitogenie.com/)
 
 ## Mito Hacker tools are now available on Mitogenie.
-##### Mitogenie is a free, no-code, fully graphical, cloud-based research platform for medical researchers, which offers many tools to help you to qunatify, manage, track, and share your data. We will maintain and update the future versions on Mitogenie only. You can join today on https://mitogenie.com/, and benefit from all the MitoHacker tools along with other tools, without a single line of coding! 
+##### Mitogenie is a free, no-code, fully graphical, cloud-based research platform for medical researchers, which offers many tools to help you to qunatify, manage, track, and share your data. We will maintain and update the future versions on Mitogenie only. You can join today on https://mitogenie.com/, and benefit from all the MitoHacker tools along with other tools, without a single line of coding! It takes only 2 minutes to register.
 
 #### Mito Hacker is a set of tools to enable high-throughput analysis of mitochondrial network morphology.
 
